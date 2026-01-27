@@ -196,7 +196,7 @@ export class DashboardManager {
         // Prepare HTML sections for each dashboard component
         const totalsSection = sectionVisibility.totals ? `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">Totals</legend>
+                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.totals') : 'Totals'}</legend>
                 <div class="dashboard-section" data-section="totals">
                     <div class="dashboard-cards totals-cards">
                         ${cardVisibility.assets !== false ? `<div class="dashboard-card card-total${!dashboardFilter ? ' active' : ''}" data-filter="all">
@@ -217,7 +217,7 @@ export class DashboardManager {
             
         const warrantiesSection = sectionVisibility.warranties ? `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">Warranties</legend>
+                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.warranties') : 'Warranties'}</legend>
                 <div class="dashboard-section dashboard-warranty-section" data-section="warranties">
                     <div class="dashboard-cards warranty-cards">
                         ${cardVisibility.warranties !== false ? `<div class="dashboard-card card-warranties${dashboardFilter === 'warranties' ? ' active' : ''}" data-filter="warranties">
@@ -249,7 +249,7 @@ export class DashboardManager {
         
         const analyticsSection = sectionVisibility.analytics ? `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">Analytics</legend>
+                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.analytics') : 'Analytics'}</legend>
                 <div class="dashboard-section" data-section="analytics">
                     <div class="dashboard-charts-section three-col">
                         <div class="chart-container">
@@ -257,7 +257,7 @@ export class DashboardManager {
                             <canvas id="warrantyPieChart" class="chart-canvas"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3>Warranties Expiring Over Time</h3>
+                            <h3>${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.analytics.warrantiesOverTime') : 'Warranties Expiring Over Time'}</h3>
                             <canvas id="warrantyLineChart" class="chart-canvas"></canvas>
                         </div>
                         <div class="chart-container">
@@ -285,9 +285,10 @@ export class DashboardManager {
         
         // Set the dashboard HTML with ordered sections
         this.subAssetContainer.classList.add('hidden');
+        const overviewTitle = (window.i18n && window.i18n.t) ? window.i18n.t('asset.overview') : 'Asset Overview';
         this.assetDetails.innerHTML = `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">Asset Overview</legend>
+                <legend class="dashboard-legend-title">${overviewTitle}</legend>
                 ${orderedSections}
             </fieldset>
         `;
@@ -363,7 +364,7 @@ export class DashboardManager {
         
         return `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">Events</legend>
+                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.events') : 'Events'}</legend>
                 <div class="dashboard-section" data-section="events">
                     <div class="events-controls">
                         <div class="events-filters">
@@ -1221,7 +1222,7 @@ export class DashboardManager {
                     // Reset the "Specific Date" option text back to default
                     const specificOption = eventsDateRangeSelect.querySelector('option[value="specific"]');
                     if (specificOption) {
-                        specificOption.textContent = 'Specific Date';
+                        specificOption.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('date.specific') : 'Specific Date';
                     }
                     
                     // Save the selection and update display
@@ -1298,7 +1299,7 @@ export class DashboardManager {
                     // Reset dropdown option text
                     const specificOption = eventsDateRangeSelect.querySelector('option[value="specific"]');
                     if (specificOption) {
-                        specificOption.textContent = 'Specific Date';
+                        specificOption.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('date.specific') : 'Specific Date';
                     }
 
                     // Hide the calendar icon

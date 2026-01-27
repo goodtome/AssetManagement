@@ -45,8 +45,8 @@ function addClearButton(input) {
     const clearButton = document.createElement('button');
     clearButton.type = 'button';
     clearButton.className = 'date-clear-btn';
-    clearButton.innerHTML = '×';
-    clearButton.title = 'Clear date';
+    clearButton.innerHTML = (window.i18n && window.i18n.t) ? window.i18n.t('action.clear') : '×';
+    clearButton.title = (window.i18n && window.i18n.t) ? window.i18n.t('action.clear') : 'Clear date';
     clearButton.style.display = input.value ? 'block' : 'none';
     
     // Add event listener to clear button

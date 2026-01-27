@@ -90,7 +90,9 @@ export class ImportManager {
             const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
             
             if (!acceptedTypes.includes(fileExtension)) {
-                globalThis.toaster.show(`Invalid file type. Please select a ${acceptedTypes.join(', ')} file.`, 'error');
+                const typesStr = acceptedTypes.join(', ');
+                const msg = (window.i18n && window.i18n.t) ? window.i18n.t('import.invalidType').replace('{types}', typesStr) : `Invalid file type. Please select a ${typesStr} file.`;
+                globalThis.toaster.show(msg, 'error');
                 return;
             }
             
@@ -131,8 +133,8 @@ export class ImportManager {
             const mappingContainer = document.querySelector('.column-mapping');
             if (mappingContainer) mappingContainer.style.display = 'block';
             // Populate column selects
-            this.columnSelects.forEach(select => {
-                select.innerHTML = '<option value="">Select Column</option>';
+                this.columnSelects.forEach(select => {
+                select.innerHTML = `<option value="">${(window.i18n && window.i18n.t) ? window.i18n.t('select.column') : 'Select Column'}</option>`;
                 headers.forEach((header, index) => {
                     const option = document.createElement('option');
                     option.value = index;
@@ -149,7 +151,7 @@ export class ImportManager {
             const quantityColumn = document.getElementById('quantityColumn');
             [urlColumn, warrantyColumn, warrantyExpirationColumn, lifetimeColumn, tagsColumn, quantityColumn].forEach(select => {
                 if (!select) return;
-                select.innerHTML = '<option value="">Select Column</option>';
+                select.innerHTML = `<option value="">${(window.i18n && window.i18n.t) ? window.i18n.t('select.column') : 'Select Column'}</option>`;
                 headers.forEach((header, index) => {
                     const option = document.createElement('option');
                     option.value = index;
@@ -161,7 +163,7 @@ export class ImportManager {
             const secondaryWarrantyExpirationColumn = document.getElementById('secondaryWarrantyExpirationColumn');
             [secondaryWarrantyColumn, secondaryWarrantyExpirationColumn].forEach(select => {
                 if (!select) return;
-                select.innerHTML = '<option value="">Select Column</option>';
+                select.innerHTML = `<option value="">${(window.i18n && window.i18n.t) ? window.i18n.t('select.column') : 'Select Column'}</option>`;
                 headers.forEach((header, index) => {
                     const option = document.createElement('option');
                     option.value = index;
@@ -199,7 +201,8 @@ export class ImportManager {
             quantity: document.getElementById('quantityColumn') ? document.getElementById('quantityColumn').value : ''
         };
         if (!mappings.name) {
-            globalThis.toaster.show('Please map the Name column', 'error');
+            const msg = (window.i18n && window.i18n.t) ? window.i18n.t('import.mapName') : 'Please map the Name column';
+            globalThis.toaster.show(msg, 'error');
             this.setButtonLoading(this.startImportBtn, false);
             return;
         }
@@ -217,7 +220,8 @@ export class ImportManager {
                 const nameIdx = mappings.name !== '' ? parseInt(mappings.name) : -1;
                 if (nameIdx === -1 || !row[nameIdx] || !row[nameIdx].trim()) {
                     // alert(`Row ${i+2}: Name is required.`);
-                    globalThis.toaster.show(`Row ${i+2}: Name is required.`, 'error');
+                    const rowMsg = (window.i18n && window.i18n.t) ? window.i18n.t('import.rowNameRequired').replace('{row}', (i+2)) : `Row ${i+2}: Name is required.`;
+                    globalThis.toaster.show(rowMsg, 'error');
                     this.setButtonLoading(this.startImportBtn, false);
                     return;
                 }
@@ -228,7 +232,8 @@ export class ImportManager {
                         const val = row[idx].replace(/"/g, '');
                         if (isNaN(Date.parse(val))) {
                             // alert(`Row ${i+2}: Invalid date in column '${headers[idx]}' (${val})`);
-                            globalThis.toaster.show(`Row ${i+2}: Invalid date in column '${headers[idx]}' (${val})`, 'error');
+                            const invalidDateMsg = (window.i18n && window.i18n.t) ? window.i18n.t('import.invalidDate').replace('{row}', (i+2)).replace('{col}', headers[idx]).replace('{val}', val) : `Row ${i+2}: Invalid date in column '${headers[idx]}' (${val})`;
+                            globalThis.toaster.show(invalidDateMsg, 'error');
                             this.setButtonLoading(this.startImportBtn, false);
                             return;
                         }
@@ -255,13 +260,14 @@ export class ImportManager {
             if (responseValidation.errorMessage) throw new Error(responseValidation.errorMessage);
 
             const result = await response.json();
-            globalThis.toaster.show(`Successfully imported ${result.importedCount} assets`, 'success');
+            const successMsg = (window.i18n && window.i18n.t) ? window.i18n.t('import.success').replace('{count}', result.importedCount) : `Successfully imported ${result.importedCount} assets`;
+            globalThis.toaster.show(successMsg, 'success');
             this.importModal.style.display = 'none';
             this.importFile.value = '';
             this.startImportBtn.disabled = true;
             this.setButtonLoading(this.startImportBtn, false);
             this.columnSelects.forEach(select => {
-                select.innerHTML = '<option value="">Select Column</option>';
+                select.innerHTML = `<option value="">${(window.i18n && window.i18n.t) ? window.i18n.t('select.column') : 'Select Column'}</option>`;
             });
             await this.loadAssets();
             // Rerender dashboard after import
@@ -328,7 +334,7 @@ export class ImportManager {
             }
         }
         this.columnSelects.forEach(select => {
-            select.innerHTML = '<option value="">Select Column</option>';
+            select.innerHTML = `<option value="">${(window.i18n && window.i18n.t) ? window.i18n.t('select.column') : 'Select Column'}</option>`;
         });
         // Explicitly reset all individual column selects in case they are not in columnSelects
         const columnIds = [
@@ -350,8 +356,8 @@ export class ImportManager {
         ];
         columnIds.forEach(id => {
             const select = document.getElementById(id);
-            if (select) {
-                select.innerHTML = '<option value="">Select Column</option>';
+                if (select) {
+                select.innerHTML = `<option value="">${(window.i18n && window.i18n.t) ? window.i18n.t('select.column') : 'Select Column'}</option>`;
                 select.value = '';
             }
         });
@@ -362,23 +368,23 @@ export class ImportManager {
     }
     
     _downloadTemplate() {
-        // Define the headers for the template CSV
+        // Define the headers for the template CSV (localized)
         const headers = [
-            'Name',
-            'Manufacturer',
-            'Model',
-            'Serial',
-            'Purchase Date',
-            'Purchase Price',
-            'Notes',
-            'URL',
-            'Warranty',
-            'Warranty Expiration',
-            'Lifetime',
-            'Secondary Warranty',
-            'Secondary Warranty Expiration',
-            'Tags',
-            'Quantity'
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.name') : 'Name',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.manufacturer') : 'Manufacturer',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.modelNumber') : 'Model',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.serialNumber') : 'Serial',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.purchaseDate') : 'Purchase Date',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.purchasePrice') : 'Purchase Price',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.notes') : 'Notes',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.url') : 'URL',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.warrantyScope') : 'Warranty',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.warrantyExpiration') : 'Warranty Expiration',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.warrantyLifetime') : 'Lifetime',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.secondaryWarrantyScope') : 'Secondary Warranty',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.secondaryWarrantyExpiration') : 'Secondary Warranty Expiration',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.tags') : 'Tags',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.quantity') || 'Quantity' : 'Quantity'
         ];
         // Generate test data row
         const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD

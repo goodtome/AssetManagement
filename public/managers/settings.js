@@ -279,7 +279,7 @@ export class SettingsManager {
             const settingsCopy = { ...settings };
             localStorage.setItem(this.localSettingsStorageKey, JSON.stringify(settingsCopy));
             this.closeSettingsModal();
-            globalThis.toaster.show('Settings saved');
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('settings.saved') : 'Settings saved');
             if (!this.selectedAssetId && typeof this.renderDashboard === 'function') {
                 this.renderDashboard();
             }
@@ -314,7 +314,7 @@ export class SettingsManager {
         .then(async (response) => {
             const responseValidation = await globalThis.validateResponse(response);
             if (responseValidation.errorMessage) throw new Error(responseValidation.errorMessage);
-            globalThis.toaster.show('Test notifications sent successfully!');
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('notifications.testSent') : 'Test notifications sent successfully!');
         })
         .catch(error => {
             globalThis.logError('Test Notification Failed:', error.message);
@@ -560,7 +560,7 @@ export class SettingsManager {
             link.click();
             document.body.removeChild(link);
             
-            globalThis.toaster.show('Data exported successfully!');
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('export.success') : 'Data exported successfully!');
             
         } catch (error) {
             globalThis.logError('Failed to export data:', error.message);
@@ -570,35 +570,35 @@ export class SettingsManager {
     }
     
     _generateCSV(assets, subAssets) {
-        // CSV headers
+        // CSV headers (localized)
         const headers = [
-            'Type',
-            'ID',
-            'Name',
-            'Manufacturer',
-            'Model Number',
-            'Serial Number',
-            'Purchase Date',
-            'Purchase Price',
-            'Currency',
-            'Location',
-            'URL',
-            'Notes',
-            'Tags',
-            'Warranty Scope',
-            'Warranty Expiration',
-            'Warranty Lifetime',
-            'Secondary Warranty Scope',
-            'Secondary Warranty Expiration',
-            'Secondary Warranty Lifetime',
-            'Maintenance Events',
-            'Photo Path',
-            'Receipt Path',
-            'Manual Path',
-            'Parent ID',
-            'Parent Sub ID',
-            'Created At',
-            'Updated At'
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.type') : 'Type',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.id') : 'ID',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.name') : 'Name',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.manufacturer') : 'Manufacturer',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.modelNumber') : 'Model Number',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.serialNumber') : 'Serial Number',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.purchaseDate') : 'Purchase Date',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.purchasePrice') : 'Purchase Price',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.currency') : 'Currency',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.location') : 'Location',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.url') : 'URL',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.notes') : 'Notes',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.tags') : 'Tags',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.warrantyScope') : 'Warranty Scope',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.warrantyExpiration') : 'Warranty Expiration',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.warrantyLifetime') : 'Warranty Lifetime',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.secondaryWarrantyScope') : 'Secondary Warranty Scope',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.secondaryWarrantyExpiration') : 'Secondary Warranty Expiration',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.secondaryWarrantyLifetime') : 'Secondary Warranty Lifetime',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.maintenanceEvents') : 'Maintenance Events',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.photoPath') : 'Photo Path',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.receiptPath') : 'Receipt Path',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.manualPath') : 'Manual Path',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.parentId') : 'Parent ID',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.parentSubId') : 'Parent Sub ID',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.createdAt') : 'Created At',
+            (window.i18n && window.i18n.t) ? window.i18n.t('export.header.updatedAt') : 'Updated At'
         ];
         
         const rows = [headers];
@@ -636,7 +636,7 @@ export class SettingsManager {
         // Add assets
         assets.forEach(asset => {
             const row = [
-                'Asset',
+                (window.i18n && window.i18n.t) ? window.i18n.t('export.type.asset') : 'Asset',
                 asset.id || '',
                 asset.name || '',
                 asset.manufacturer || '',
@@ -651,10 +651,10 @@ export class SettingsManager {
                 (asset.tags && asset.tags.length > 0) ? asset.tags.join('; ') : '',
                 asset.warranty?.scope || '',
                 asset.warranty?.expirationDate || '',
-                asset.warranty?.isLifetime ? 'Yes' : 'No',
+                asset.warranty?.isLifetime ? ((window.i18n && window.i18n.t) ? window.i18n.t('word.yes') : 'Yes') : ((window.i18n && window.i18n.t) ? window.i18n.t('word.no') : 'No'),
                 asset.secondaryWarranty?.scope || '',
                 asset.secondaryWarranty?.expirationDate || '',
-                asset.secondaryWarranty?.isLifetime ? 'Yes' : 'No',
+                asset.secondaryWarranty?.isLifetime ? ((window.i18n && window.i18n.t) ? window.i18n.t('word.yes') : 'Yes') : ((window.i18n && window.i18n.t) ? window.i18n.t('word.no') : 'No'),
                 formatMaintenanceEvents(asset.maintenanceEvents),
                 asset.photoPath || '',
                 asset.receiptPath || '',
@@ -670,7 +670,7 @@ export class SettingsManager {
         // Add sub-assets
         subAssets.forEach(subAsset => {
             const row = [
-                subAsset.parentSubId ? 'Sub-Component' : 'Component',
+                subAsset.parentSubId ? ((window.i18n && window.i18n.t) ? window.i18n.t('export.type.subcomponent') : 'Sub-Component') : ((window.i18n && window.i18n.t) ? window.i18n.t('export.type.component') : 'Component'),
                 subAsset.id || '',
                 subAsset.name || '',
                 subAsset.manufacturer || '',
@@ -685,7 +685,7 @@ export class SettingsManager {
                 (subAsset.tags && subAsset.tags.length > 0) ? subAsset.tags.join('; ') : '',
                 subAsset.warranty?.scope || '',
                 subAsset.warranty?.expirationDate || '',
-                subAsset.warranty?.isLifetime ? 'Yes' : 'No',
+                subAsset.warranty?.isLifetime ? ((window.i18n && window.i18n.t) ? window.i18n.t('word.yes') : 'Yes') : ((window.i18n && window.i18n.t) ? window.i18n.t('word.no') : 'No'),
                 '', // Secondary warranty scope (sub-assets don't have secondary warranties)
                 '', // Secondary warranty expiration
                 '', // Secondary warranty lifetime
@@ -751,7 +751,7 @@ export class SettingsManager {
             link.click();
             document.body.removeChild(link);
             
-            globalThis.toaster.show('Simple data exported successfully!');
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('export.simpleSuccess') : 'Simple data exported successfully!');
             
         } catch (error) {
             globalThis.logError('Failed to export simple data:', error.message);

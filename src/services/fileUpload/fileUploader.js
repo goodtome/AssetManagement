@@ -181,9 +181,12 @@ function setupFileInputPreview(inputId, previewId, isDocument = false, fileType 
                 docType = 'document';
             }
             
-            // Set up delete handler
+            // Set up delete handler (localized)
+            const localizedDocType = (docType === 'receipt') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.receipt') || 'Receipt') : 'Receipt') : ((docType === 'manual') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.manual') || 'Manual') : 'Manual') : ((window.i18n && window.i18n.t) ? (window.i18n.t('file.document') || 'Document') : 'Document'));
+            const confirmTemplate = (window.i18n && window.i18n.t) ? (window.i18n.t('confirm.deleteFile') || 'Are you sure you want to delete this {type}?') : 'Are you sure you want to delete this {type}?';
             const deleteHandler = () => {
-                if (confirm(`Are you sure you want to delete this ${docType}?`)) {
+                const confirmMsg = confirmTemplate.replace('{type}', localizedDocType);
+                if (confirm(confirmMsg)) {
                     removeFile(file);
                 }
             };
@@ -196,9 +199,12 @@ function setupFileInputPreview(inputId, previewId, isDocument = false, fileType 
             // For images, use the photo preview component
             const reader = new FileReader();
             reader.onload = (e) => {
-                // Set up delete handler
+                // Set up delete handler (localized)
+                const photoLabel = (window.i18n && window.i18n.t) ? (window.i18n.t('file.photo') || 'Photo') : 'Photo';
+                const confirmTemplateImg = (window.i18n && window.i18n.t) ? (window.i18n.t('confirm.deleteFile') || 'Are you sure you want to delete this {type}?') : 'Are you sure you want to delete this image?';
                 const deleteHandler = () => {
-                    if (confirm('Are you sure you want to delete this image?')) {
+                    const confirmMsg = confirmTemplateImg.replace('{type}', photoLabel);
+                    if (confirm(confirmMsg)) {
                         removeFile(file);
                     }
                 };
@@ -517,20 +523,20 @@ function setupDragAndDrop() {
                 
                 if (invalidFiles > 0) {
                     if (validFiles > 0) {
-                        const fileText = acceptsMultiple ? 'file(s)' : 'file';
-                        globalThis.toaster?.show(`${validFiles} valid ${fileText} added. ${invalidFiles} file(s) were invalid or duplicate and were skipped.`, 'error') ||
-                        alert(`${validFiles} valid ${fileText} added. ${invalidFiles} file(s) were invalid or duplicate and were skipped.`);
+                        const fileText = acceptsMultiple ? (window.i18n && window.i18n.t ? window.i18n.t('file.uploadSummary').replace('{valid}', validFiles).replace('{type}', acceptsMultiple ? (window.i18n.t('file.unknown') || 'file(s)') : (window.i18n.t('file.unknown') || 'file')) : `${validFiles} valid file(s)`) : (window.i18n && window.i18n.t ? window.i18n.t('file.uploadSummary').replace('{valid}', validFiles).replace('{type}', (window.i18n.t('file.unknown') || 'file')).replace('{invalid}', invalidFiles) : `${validFiles} valid file(s) added. ${invalidFiles} file(s) were invalid or duplicate and were skipped.`);
+                        const summaryMsg = (window.i18n && window.i18n.t) ? window.i18n.t('file.uploadSummary').replace('{valid}', validFiles).replace('{type}', acceptsMultiple ? (window.i18n.t('file.unknown') || 'file(s)') : (window.i18n.t('file.unknown') || 'file')).replace('{invalid}', invalidFiles) : `${validFiles} valid file(s) added. ${invalidFiles} file(s) were invalid or duplicate and were skipped.`;
+                        if (globalThis.toaster) globalThis.toaster.show(summaryMsg, 'error');
+                        else alert(summaryMsg);
                     } else {
-                        const message = acceptsMultiple
-                            ? 'Invalid file type(s) or duplicate files. Please upload supported, non-duplicate files.'
-                            : 'Invalid file type. Please upload a supported file.';
+                        const message = (window.i18n && window.i18n.t) ? (acceptsMultiple ? window.i18n.t('file.invalidMultiple') : window.i18n.t('file.invalidAll')) : (acceptsMultiple ? 'Invalid file type(s) or duplicate files. Please upload supported, non-duplicate files.' : 'Invalid file type. Please upload a supported file.');
                         if (globalThis.toaster) globalThis.toaster.show(message, 'error');
                         else alert(message);
                     }
                 } else if (validFiles > 1 && !acceptsMultiple) {
                     // User dropped multiple files on a single-file input
-                    if (globalThis.toaster) globalThis.toaster?.show('Only one file allowed. The first valid file was selected.', 'error');
-                    else alert('Only one file allowed. The first valid file was selected.');
+                    const onlyOneMsg = (window.i18n && window.i18n.t) ? window.i18n.t('file.onlyOneAllowed') : 'Only one file allowed. The first valid file was selected.';
+                    if (globalThis.toaster) globalThis.toaster.show(onlyOneMsg, 'error');
+                    else alert(onlyOneMsg);
                 }
             }
         }

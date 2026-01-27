@@ -174,3 +174,5 @@ window.addEventListener('load', () => {
 
 // Make theme functions globally available
 window.toggleTheme = toggleTheme; 
+// Expose site title for i18n and other scripts
+window.SITE_TITLE = SITE_TITLE;

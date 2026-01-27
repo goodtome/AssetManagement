@@ -132,7 +132,10 @@ function renderAssetList(searchQuery = '') {
     assetList.innerHTML = '';
 
     if (assets.length === 0) {
-        assetList.innerHTML = '<div class="empty-state">No assets found</div>';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+        emptyDiv.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('empty.noAssets') : 'No assets found';
+        assetList.appendChild(emptyDiv);
         return;
     }
 
@@ -329,8 +332,8 @@ function renderAssetList(searchQuery = '') {
         }
         
         // Format asset item with name, model, and tags
-        assetItem.innerHTML += `
-            <div class="asset-item-name">${asset.name || 'Unnamed Asset'}</div>
+            assetItem.innerHTML += `
+            <div class="asset-item-name">${asset.name || ((window.i18n && window.i18n.t) ? window.i18n.t('asset.unnamed') : 'Unnamed Asset')}</div>
             ${asset.modelNumber ? `<div class="asset-item-model">${asset.modelNumber}</div>` : ''}
             ${asset.tags && asset.tags.length > 0 ? `
                 <div class="asset-item-tags">

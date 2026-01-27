@@ -68,8 +68,8 @@ export class MaintenanceManager {
         return `
             <div id="${eventId}" class="maintenance-event">
                 <div class="maintenance-event-header">
-                    <h4 class="maintenance-event-title">Maintenance Event</h4>
-                    <button type="button" class="delete-maintenance-event" title="Delete event">
+                    <h4 class="maintenance-event-title">${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.eventLabel') : 'Maintenance Event'}</h4>
+                    <button type="button" class="delete-maintenance-event" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.delete') : 'Delete event'}">
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -82,8 +82,8 @@ export class MaintenanceManager {
                     </div>
                     <div class="maintenance-event-row">
                         <select name="eventType">
-                            <option value="frequency">Frequency Based</option>
-                            <option value="specific">Specific Date</option>
+                            <option value="frequency">${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.recurring') : 'Frequency Based'}</option>
+                            <option value="specific">${(window.i18n && window.i18n.t) ? window.i18n.t('date.specific') : 'Specific Date'}</option>
                         </select>
                     </div>
                     <div class="maintenance-event-row frequency-fields">
@@ -96,8 +96,8 @@ export class MaintenanceManager {
                         </select>
                     </div>
                     <div class="maintenance-event-row frequency-fields">
-                        <label for="nextDueDate" class="frequency-due-label">Next Due Date:</label>
-                        <input type="date" name="nextDueDate" title="When should this maintenance be performed next?">
+                        <label for="nextDueDate" class="frequency-due-label">${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.eventLabel') : 'Next Due Date:'}</label>
+                        <input type="date" name="nextDueDate" title="${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.nextDueTitle') : 'When should this maintenance be performed next?'}">
                     </div>
                     <div class="maintenance-event-row specific-date-fields" style="display: none;">
                         <input type="date" name="specificDate">

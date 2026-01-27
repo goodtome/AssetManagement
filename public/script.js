@@ -491,7 +491,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Show success message
-            globalThis.toaster.show(isEditMode ? "Asset updated successfully!" : "Asset added successfully!");
+            const assetMsgKey = isEditMode ? 'asset.updated' : 'asset.added';
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t(assetMsgKey) : (isEditMode ? "Asset updated successfully!" : "Asset added successfully!"));
             setButtonLoading(saveBtn, false);
         } catch (error) {
             globalThis.logError('Error saving asset:', error.message);
@@ -564,7 +565,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             // Show success message
-            globalThis.toaster.show(isEditMode ? "Component updated successfully!" : "Component added successfully!");
+            const compMsgKey = isEditMode ? 'component.updated' : 'component.added';
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t(compMsgKey) : (isEditMode ? "Component updated successfully!" : "Component added successfully!"));
             setButtonLoading(saveBtn, false);
         } catch (error) {
             globalThis.logError('Error saving component:', error.message);
@@ -574,7 +576,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function deleteAsset(assetId) {
-        if (!confirm('Are you sure you want to delete this asset? This will also delete all its components.')) {
+        if (!confirm((window.i18n && window.i18n.t) ? window.i18n.t('confirm.deleteAsset') : 'Are you sure you want to delete this asset? This will also delete all its components.')) {
             return;
         }
         
@@ -591,14 +593,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSelectedIds(null, null);
             await refreshAllData();
             dashboardManager.renderDashboard();
-            globalThis.toaster.show("Asset deleted successfully!");
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('asset.deleted') : "Asset deleted successfully!");
         } catch (error) {
             globalThis.logError('Error deleting asset:', error.message);
         }
     }
 
     async function deleteSubAsset(subAssetId) {
-        if (!confirm('Are you sure you want to delete this component? This will also delete any sub-components.')) {
+        if (!confirm((window.i18n && window.i18n.t) ? window.i18n.t('confirm.deleteComponent') : 'Are you sure you want to delete this component? This will also delete any sub-components.')) {
             return;
         }
         
@@ -636,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await refreshAssetDetails(parentAssetId, false);
             }
             
-            globalThis.toaster.show("Component deleted successfully!");
+            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('component.deleted') : "Component deleted successfully!");
         } catch (error) {
             globalThis.logError('Error deleting component:', error.message);
         }
@@ -730,7 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const subAssetHeader = subAssetContainer.querySelector('.sub-asset-header');
         if (subAssetHeader) {
             subAssetHeader.innerHTML = `
-            <button id="addSubAssetBtn" class="add-sub-asset-btn">+ Add Component</button>
+            <button id="addSubAssetBtn" class="add-sub-asset-btn">${(window.i18n && window.i18n.t) ? window.i18n.t('add.subcomponent') : '+ Add Component'}</button>
             `;
             const addSubAssetBtn = subAssetHeader.querySelector('#addSubAssetBtn');
             if (addSubAssetBtn) {
@@ -740,9 +742,10 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Render the sub-asset list
         if (parentSubAssets.length === 0) {
+            const emptyMsg = (window.i18n && window.i18n.t) ? window.i18n.t('empty.noComponents') : 'No components found. Add your first component.';
             subAssetList.innerHTML = `
             <div class="empty-state">
-                <p>No components found. Add your first component.</p>
+                <p>${emptyMsg}</p>
             </div>
             `;
         } else {
@@ -794,10 +797,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ${warrantyDot}
             <div class="sub-asset-title">${subAsset.name}</div>
             <div class="sub-asset-actions">
-                <button class="edit-sub-btn" data-id="${subAsset.id}" title="Edit">
+                <button class="edit-sub-btn" data-id="${subAsset.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.edit') : 'Edit'}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
                 </button>
-                <button class="delete-sub-btn" data-id="${subAsset.id}" title="Delete">
+                <button class="delete-sub-btn" data-id="${subAsset.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.delete') : 'Delete'}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
             </div>
@@ -963,10 +966,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${childWarrantyDot}
                         <div class="sub-asset-title">${child.name}</div>
                         <div class="sub-asset-actions">
-                            <button class="edit-sub-btn" data-id="${child.id}" title="Edit">
+                            <button class="edit-sub-btn" data-id="${child.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.edit') : 'Edit'}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
                             </button>
-                            <button class="delete-sub-btn" data-id="${child.id}" title="Delete">
+                            <button class="delete-sub-btn" data-id="${child.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.delete') : 'Delete'}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             </button>
                         </div>
@@ -1172,13 +1175,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add secondary warranty info if it exists
         let detailsHtml = '';
         if (item.secondaryWarranty) {
+            const secLabel = (window.i18n && window.i18n.t) ? window.i18n.t('asset.secondaryWarrantyLabel') : 'Secondary Warranty';
+            const secExpLabel = (window.i18n && window.i18n.t) ? window.i18n.t('mapping.secondaryWarrantyExpiration') : 'Secondary Warranty Expiration';
+            const naText = (window.i18n && window.i18n.t) ? window.i18n.t('word.na') : 'N/A';
             detailsHtml += `
                 <div class="info-item">
-                    <div class="info-label">Secondary Warranty</div>
-                    <div>${item.secondaryWarranty.scope || 'N/A'}</div>
+                    <div class="info-label">${secLabel}</div>
+                    <div>${item.secondaryWarranty.scope || naText}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">Secondary Warranty Expiration</div>
+                    <div class="info-label">${secExpLabel}</div>
                     <div>${formatDate(item.secondaryWarranty.expirationDate)}</div>
                 </div>
             `;
@@ -1224,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = Array.from(tags).map(tag => `
                 <span class="tag">
                     ${tag}
-                    <button class="remove-tag" data-tag="${tag}" title="Remove tag">
+                    <button class="remove-tag" data-tag="${tag}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.removeTag') : 'Remove tag'}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
