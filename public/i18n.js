@@ -94,6 +94,8 @@
       'card.warrantiesExpired': 'Warranties Expired',
       'card.warrantiesActive': 'Warranties Active',
       'dashboard.analytics.warrantiesOverTime': 'Warranties Expiring Over Time',
+      'dashboard.analytics.warrantyStatus': 'Warranty Status',
+      'dashboard.analytics.upcomingMaintenanceEvents': 'Upcoming Maintenance Events',
       'asset.overview': 'Asset Overview',
       'notify.assetAdded': 'Asset Added',
       'notify.assetDeleted': 'Asset Deleted',
@@ -126,7 +128,7 @@
       'add.subcomponent': '+ Add Sub-Component',
       'editComponent.title': 'Edit Component',
       'empty.noComponents': 'No components found. Add your first component.',
-      'tags.placeholder': '添加标签（按回车或逗号添加）',
+      'tags.placeholder': 'Add tags (press enter or comma to add)',
       'date.specific': 'Specific Date',
       'error.generic': 'An error occurred. Please try again.',
       'asset.warrantyLabel': 'Warranty',
@@ -291,6 +293,8 @@
       'card.warrantiesExpired': '保修已过期',
       'card.warrantiesActive': '保修有效',
       'dashboard.analytics.warrantiesOverTime': '随时间到期的保修',
+      'dashboard.analytics.warrantyStatus': '保修状态',
+      'dashboard.analytics.upcomingMaintenanceEvents': '即将进行的维护事件',
       'asset.overview': '资产概览',
       'notify.assetAdded': '添加资产',
       'notify.assetDeleted': '删除资产',
@@ -323,6 +327,7 @@
       'add.subcomponent': '+ 添加子组件',
       'editComponent.title': '编辑组件',
       'empty.noComponents': '未找到组件。添加你的第一个组件以开始。',
+      'tags.placeholder': '添加标签（按回车或逗号添加）',
       'date.specific': '特定日期',
       'error.generic': '发生错误。请重试。',
       'asset.warrantyLabel': '保修',
@@ -411,10 +416,12 @@
       const ev = new CustomEvent('i18n:changed', { detail: { lang } });
       document.dispatchEvent(ev);
     }catch(e){}
-    // Some parts of the app create DOM asynchronously; run a follow-up translate
-    // shortly after to catch those elements (fixes timing issues where toggle
+    // Some parts of the app create DOM asynchronously; run follow-up translates
+    // at multiple intervals to catch those elements (fixes timing issues where toggle
     // needs multiple clicks to take effect).
     setTimeout(() => translateDocument(lang), 50);
+    setTimeout(() => translateDocument(lang), 100);
+    setTimeout(() => translateDocument(lang), 200);
   }
 
   function t(key, lang){
@@ -427,7 +434,7 @@
     {selector:'#pageTitle', type:'text', key:'app.title'},
     {selector:'#siteTitle', type:'text', key:'app.title'},
     {selector:'#demo-banner span', type:'text', key:'demo.mode'},
-    {selector:'#homeBtn', type:'aria', attr:'aria-label', key:'home.aria'},
+    {selector:'#homeBtn', type:'aria', attr:'aria-label', key:'home.aria', retryCount: 5},
     {selector:'#settingsBtn', type:'aria', attr:'aria-label', key:'settings.aria'},
     {selector:'#themeToggle', type:'aria', attr:'aria-label', key:'theme.aria'},
     {selector:'#searchInput', type:'placeholder', key:'search.placeholder'},
@@ -490,6 +497,26 @@
       }
     });
 
+    // Translate all elements with aria-label attributes more robustly
+    // This ensures buttons like homeBtn get their aria-labels updated
+    const ariaElements = document.querySelectorAll('[aria-label]');
+    ariaElements.forEach(el => {
+      const currentLabel = el.getAttribute('aria-label');
+      // Map common aria-labels to translation keys
+      const ariaLabelMap = {
+        'Go to Dashboard': 'home.aria',
+        'Settings': 'settings.aria',
+        'Toggle theme': 'theme.aria',
+        'Toggle asset list': 'toggle.showAssets'
+      };
+      
+      const key = ariaLabelMap[currentLabel];
+      if (key) {
+        const translatedValue = t(key, l);
+        el.setAttribute('aria-label', translatedValue);
+      }
+    });
+
     // Also translate any elements with data-i18n attribute
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
@@ -526,6 +553,18 @@
     document.querySelectorAll('.dashboard-legend-title').forEach(el => {
       const current = (el.textContent || '').trim();
       const key = legendMap[current];
+      if (key) el.textContent = t(key, l);
+    });
+
+    // Auto-translate chart titles and other dynamic h3 elements in dashboard
+    const chartTitleMap = {
+      'Warranty Status': 'dashboard.analytics.warrantyStatus',
+      'Warranties Expiring Over Time': 'dashboard.analytics.warrantiesOverTime',
+      'Upcoming Maintenance Events': 'dashboard.analytics.upcomingMaintenanceEvents'
+    };
+    document.querySelectorAll('.chart-container h3').forEach(el => {
+      const current = (el.textContent || '').trim();
+      const key = chartTitleMap[current];
       if (key) el.textContent = t(key, l);
     });
   }

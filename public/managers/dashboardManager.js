@@ -253,7 +253,7 @@ export class DashboardManager {
                 <div class="dashboard-section" data-section="analytics">
                     <div class="dashboard-charts-section three-col">
                         <div class="chart-container">
-                            <h3>Warranty Status</h3>
+                            <h3>${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.analytics.warrantyStatus') : 'Warranty Status'}</h3>
                             <canvas id="warrantyPieChart" class="chart-canvas"></canvas>
                         </div>
                         <div class="chart-container">
@@ -261,7 +261,7 @@ export class DashboardManager {
                             <canvas id="warrantyLineChart" class="chart-canvas"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3>Upcoming Maintenance Events</h3>
+                            <h3>${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.analytics.upcomingMaintenanceEvents') : 'Upcoming Maintenance Events'}</h3>
                             <canvas id="maintenanceLineChart" class="chart-canvas"></canvas>
                         </div>
                     </div>
