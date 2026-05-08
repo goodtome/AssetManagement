@@ -5,121 +5,154 @@
  */
 
 const { spawn } = require('child_process');
-const path = require('path');
 const { formatDate, sanitizeText } = require('./utils');
 const notificationQueue = require('./notificationQueue');
 
-function formatNotification(eventType, assetData, baseUrl = '') {
-  let lines = [];
-  
-  // Create direct link to asset if we have an ID and baseUrl
+const notificationTranslations = {
+  en: {
+    assetAdded: 'Asset Added',
+    assetDeleted: 'Asset Deleted',
+    assetEdited: 'Asset Edited',
+    component: 'Component',
+    asset: 'Asset',
+    parentAsset: 'Parent Asset',
+    model: 'Model #',
+    serial: 'Serial #',
+    purchaseDate: 'Purchase Date',
+    price: 'Price',
+    warranty: 'Warranty',
+    warrantyExpiration: 'Warranty Expiration',
+    warrantyExpiring: 'Warranty expiring in {time}',
+    expires: 'Expires',
+    maintenanceSchedule: 'Maintenance Schedule',
+    event: 'Event',
+    schedule: 'Schedule',
+    notes: 'Notes',
+    testNotification: 'Test Notification',
+    notification: 'Notification',
+    viewAsset: 'View Asset'
+  },
+  zh: {
+    assetAdded: '资产已添加',
+    assetDeleted: '资产已删除',
+    assetEdited: '资产已编辑',
+    component: '组件',
+    asset: '资产',
+    parentAsset: '父级资产',
+    model: '型号',
+    serial: '序列号',
+    purchaseDate: '购买日期',
+    price: '价格',
+    warranty: '保修',
+    warrantyExpiration: '保修到期',
+    warrantyExpiring: '保修将在 {time} 后到期',
+    expires: '到期时间',
+    maintenanceSchedule: '维护计划',
+    event: '事件',
+    schedule: '计划',
+    notes: '备注',
+    testNotification: '测试通知',
+    notification: '通知',
+    viewAsset: '查看资产'
+  }
+};
+
+function notifyText(lang, key, params = {}) {
+  const locale = notificationTranslations[lang] ? lang : 'en';
+  const template = notificationTranslations[locale][key] || notificationTranslations.en[key] || key;
+  return template.replace(/\{(\w+)\}/g, (_, token) => (
+    Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+  ));
+}
+
+function formatNotification(eventType, assetData, baseUrl = '', lang = 'en') {
+  const lines = [];
+
   let assetLink = '';
   if (assetData.id && baseUrl) {
-    // For sub-assets, we need to include both parent and sub-asset info
-    if (assetData.parentId) {
-      assetLink = `${baseUrl}?ass=${assetData.parentId}&sub=${assetData.id}`;
-    } else {
-      assetLink = `${baseUrl}?ass=${assetData.id}`;
-    }
+    assetLink = assetData.parentId
+      ? `${baseUrl}?ass=${assetData.parentId}&sub=${assetData.id}`
+      : `${baseUrl}?ass=${assetData.id}`;
   }
-  
+
   if (eventType === 'asset_added') {
-    lines.push('✅ Asset Added');
-    // Add component identifier if this is a sub-asset
-    if (assetData.parentId) {
-      lines.push('📦 Component');
-    }
+    lines.push(notifyText(lang, 'assetAdded'));
+    if (assetData.parentId) lines.push(notifyText(lang, 'component'));
   } else if (eventType === 'asset_deleted') {
-    lines.push('❌ Asset Deleted');
-    // Add component identifier if this is a sub-asset
-    if (assetData.parentId) {
-      lines.push('📦 Component');
-    }
-    // Add detailed asset information for deletion
-    if (assetData.name) lines.push(`Name: ${assetData.name}`);
-    if (assetData.modelNumber) lines.push(`Model #: ${assetData.modelNumber}`);
-    if (assetData.serialNumber) lines.push(`Serial #: ${assetData.serialNumber}`);
-    if (assetData.purchaseDate) lines.push(`Purchase Date: ${assetData.purchaseDate}`);
-    if (assetData.price) lines.push(`Price: ${assetData.price}`);
+    lines.push(notifyText(lang, 'assetDeleted'));
+    if (assetData.parentId) lines.push(notifyText(lang, 'component'));
+    if (assetData.name) lines.push(`${notifyText(lang, 'asset')}: ${assetData.name}`);
+    if (assetData.modelNumber) lines.push(`${notifyText(lang, 'model')}: ${assetData.modelNumber}`);
+    if (assetData.serialNumber) lines.push(`${notifyText(lang, 'serial')}: ${assetData.serialNumber}`);
+    if (assetData.purchaseDate) lines.push(`${notifyText(lang, 'purchaseDate')}: ${assetData.purchaseDate}`);
+    if (assetData.price) lines.push(`${notifyText(lang, 'price')}: ${assetData.price}`);
     if (assetData.warranty) {
-      if (assetData.warranty.scope) lines.push(`Warranty: ${assetData.warranty.scope}`);
-      if (assetData.warranty.expirationDate) lines.push(`Warranty Expiration: ${assetData.warranty.expirationDate}`);
+      if (assetData.warranty.scope) lines.push(`${notifyText(lang, 'warranty')}: ${assetData.warranty.scope}`);
+      if (assetData.warranty.expirationDate) {
+        lines.push(`${notifyText(lang, 'warrantyExpiration')}: ${assetData.warranty.expirationDate}`);
+      }
     }
   } else if (eventType === 'asset_edited') {
-    lines.push('✏️ Asset Edited');
-    // Add component identifier if this is a sub-asset
-    if (assetData.parentId) {
-      lines.push('📦 Component');
-    }
+    lines.push(notifyText(lang, 'assetEdited'));
+    if (assetData.parentId) lines.push(notifyText(lang, 'component'));
   } else if (eventType === 'warranty_expiring') {
-    lines.push(`⏰ Warranty Expiring in ${assetData.days ? assetData.days + ' days' : assetData.time || ''}`);
+    const timeValue = assetData.days ? `${assetData.days}` : (assetData.time || '');
+    lines.push(notifyText(lang, 'warrantyExpiring', { time: timeValue }));
     if (assetData.assetType === 'Component') {
-      lines.push(`Component: ${assetData.name}`);
+      lines.push(`${notifyText(lang, 'component')}: ${assetData.name}`);
     } else {
-      lines.push(`Asset: ${assetData.name}`);
+      lines.push(`${notifyText(lang, 'asset')}: ${assetData.name}`);
     }
-    if (assetData.modelNumber) lines.push(`Model #: ${assetData.modelNumber}`);
+    if (assetData.modelNumber) lines.push(`${notifyText(lang, 'model')}: ${assetData.modelNumber}`);
     if (assetData.warrantyType) lines.push(assetData.warrantyType);
-    if (assetData.expirationDate) lines.push(`Expires: ${assetData.expirationDate}`);
+    if (assetData.expirationDate) lines.push(`${notifyText(lang, 'expires')}: ${assetData.expirationDate}`);
   } else if (eventType === 'maintenance_schedule') {
-    lines.push('🛠️ Maintenance Schedule');
+    lines.push(notifyText(lang, 'maintenanceSchedule'));
     if (assetData.type === 'Component') {
-      lines.push(`Component: ${assetData.name}`);
-      if (assetData.parentAsset) lines.push(`Parent Asset: ${assetData.parentAsset}`);
+      lines.push(`${notifyText(lang, 'component')}: ${assetData.name}`);
+      if (assetData.parentAsset) lines.push(`${notifyText(lang, 'parentAsset')}: ${assetData.parentAsset}`);
     } else {
-      lines.push(`Asset: ${assetData.name}`);
+      lines.push(`${notifyText(lang, 'asset')}: ${assetData.name}`);
     }
-    if (assetData.modelNumber) lines.push(`Model #: ${assetData.modelNumber}`);
-    if (assetData.eventName) lines.push(`Event: ${assetData.eventName}`);
-    if (assetData.schedule) lines.push(`Schedule: ${assetData.schedule}`);
-    if (assetData.notes) lines.push(`Notes: ${assetData.notes}`);
+    if (assetData.modelNumber) lines.push(`${notifyText(lang, 'model')}: ${assetData.modelNumber}`);
+    if (assetData.eventName) lines.push(`${notifyText(lang, 'event')}: ${assetData.eventName}`);
+    if (assetData.schedule) lines.push(`${notifyText(lang, 'schedule')}: ${assetData.schedule}`);
+    if (assetData.notes) lines.push(`${notifyText(lang, 'notes')}: ${assetData.notes}`);
   } else if (eventType === 'test') {
-    lines.push('🧪🔔 Test Notification');
+    lines.push(notifyText(lang, 'testNotification'));
   } else {
-    lines.push('🔔 Notification');
+    lines.push(notifyText(lang, 'notification'));
   }
-  
-  // Add basic info for other event types
-  if (!['asset_deleted','maintenance_schedule','warranty_expiring'].includes(eventType)) {
+
+  if (!['asset_deleted', 'maintenance_schedule', 'warranty_expiring'].includes(eventType)) {
     if (assetData.name) lines.push(assetData.name);
     if (assetData.modelNumber) lines.push(assetData.modelNumber);
     if (assetData.description) lines.push(assetData.description);
   }
-  
-  // Add direct link if available
+
   if (assetLink) {
     lines.push('');
-    lines.push(`🔗 View Asset: ${assetLink}`);
+    lines.push(`${notifyText(lang, 'viewAsset')}: ${assetLink}`);
   }
-  
+
   return lines.join('\n');
 }
 
-/**
- * Internal function to actually send the notification (used by the queue)
- * @param {string} eventType - Type of event
- * @param {Object} assetData - Data about the asset/event
- * @param {Object} config - Configuration object
- * @returns {Promise<void>}
- */
 async function _sendNotificationImmediate(eventType, assetData, config) {
-  const { appriseUrl, appriseMessage, baseUrl } = config;
+  const { appriseUrl, appriseMessage, baseUrl, language = 'en' } = config;
   if (!appriseUrl) return;
 
   try {
-    // Sanitize asset data for message
     const safeData = {};
     for (const key in assetData) {
       safeData[key] = sanitizeText(assetData[key]);
     }
-    // Add eventType and date
     safeData.eventType = eventType;
     safeData.date = formatDate(new Date());
 
-    // Use formatted message for known event types
     let message = appriseMessage;
-    if (!appriseMessage || ['asset_added','asset_deleted','asset_edited','warranty_expiring','test'].includes(eventType)) {
-      message = formatNotification(eventType, safeData, baseUrl);
+    if (!appriseMessage || ['asset_added', 'asset_deleted', 'asset_edited', 'warranty_expiring', 'test', 'maintenance_schedule'].includes(eventType)) {
+      message = formatNotification(eventType, safeData, baseUrl, language);
     } else {
       Object.entries(safeData).forEach(([key, value]) => {
         message = message.replace(new RegExp(`{${key}}`, 'g'), value);
@@ -152,18 +185,11 @@ async function _sendNotificationImmediate(eventType, assetData, config) {
   }
 }
 
-/**
- * Send a notification using Apprise (queued with 5-second delays between notifications)
- * @param {string} eventType - Type of event (e.g., 'asset_added', 'import_complete')
- * @param {Object} assetData - Data about the asset/event (e.g., { name, modelNumber, price })
- * @param {Object} config - Configuration object (appriseUrl, appriseMessage, etc.)
- * @returns {Promise<void>}
- */
 async function sendNotification(eventType, assetData, config) {
-  // Add the notification to the queue instead of sending immediately
   notificationQueue.enqueue(_sendNotificationImmediate, [eventType, assetData, config]);
 }
 
 module.exports = {
   sendNotification,
+  formatNotification
 };

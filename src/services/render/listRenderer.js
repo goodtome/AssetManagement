@@ -21,6 +21,19 @@ let searchInput;
 // DOM element references
 let assetList;
 
+const t = (key, fallback) => {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return template;
+};
+
 /**
  * Initialize the list renderer with required dependencies
  * 
@@ -134,7 +147,7 @@ function renderAssetList(searchQuery = '') {
     if (assets.length === 0) {
         const emptyDiv = document.createElement('div');
         emptyDiv.className = 'empty-state';
-        emptyDiv.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('empty.noAssets') : 'No assets found';
+        emptyDiv.textContent = t('empty.noAssets', 'No assets found. Add your first asset to get started.');
         assetList.appendChild(emptyDiv);
         return;
     }
@@ -333,7 +346,7 @@ function renderAssetList(searchQuery = '') {
         
         // Format asset item with name, model, and tags
             assetItem.innerHTML += `
-            <div class="asset-item-name">${asset.name || ((window.i18n && window.i18n.t) ? window.i18n.t('asset.unnamed') : 'Unnamed Asset')}</div>
+            <div class="asset-item-name">${asset.name || t('asset.unnamed', 'Unnamed Asset')}</div>
             ${asset.modelNumber ? `<div class="asset-item-model">${asset.modelNumber}</div>` : ''}
             ${asset.tags && asset.tags.length > 0 ? `
                 <div class="asset-item-tags">

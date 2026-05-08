@@ -5,6 +5,19 @@
 
 import { formatDate } from '../helpers/utils.js';
 
+const t = (key, fallback) => {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return template;
+};
+
 export class ModalManager {
     constructor({
         // DOM elements
@@ -117,7 +130,7 @@ export class ModalManager {
         const addAssetTitleEl = document.getElementById('addAssetTitle');
         if (addAssetTitleEl) {
             const key = this.isEditMode ? 'editAsset.title' : 'addAsset.title';
-            addAssetTitleEl.textContent = (window.i18n && window.i18n.t) ? window.i18n.t(key) : (this.isEditMode ? 'Edit Asset' : 'Add Asset');
+            addAssetTitleEl.textContent = t(key, this.isEditMode ? 'Edit Asset' : 'Add Asset');
         }
         this.assetForm.reset();
         let containsExistingFiles = false;
@@ -209,7 +222,7 @@ export class ModalManager {
         const addComponentTitleEl = document.getElementById('addComponentTitle');
         if (addComponentTitleEl) {
             const key = this.isEditMode ? 'editComponent.title' : 'sub.addComponent';
-            addComponentTitleEl.textContent = (window.i18n && window.i18n.t) ? window.i18n.t(key) : (this.isEditMode ? 'Edit Component' : 'Add Component');
+            addComponentTitleEl.textContent = t(key, this.isEditMode ? 'Edit Component' : 'Add Component');
         }
         this.subAssetForm.reset();
         let containsExistingFiles = false;
@@ -287,7 +300,7 @@ export class ModalManager {
         if (addSecondaryWarrantyBtn) {
             addSecondaryWarrantyBtn.setAttribute('aria-expanded', 'false');
             addSecondaryWarrantyBtn.setAttribute('aria-controls', 'secondaryWarrantyFields');
-            addSecondaryWarrantyBtn.title = (window.i18n && window.i18n.t) ? window.i18n.t('warranty.addSecondary') : 'Add Secondary Warranty';
+            addSecondaryWarrantyBtn.title = t('warranty.addSecondary', 'Add Secondary Warranty');
             addSecondaryWarrantyBtn.onclick = () => {
                 const fields = document.getElementById('secondaryWarrantyFields');
                 const expanded = fields && fields.style.display !== 'none';
@@ -299,8 +312,8 @@ export class ModalManager {
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                                ${ (window.i18n && window.i18n.t) ? window.i18n.t('warranty.addSecondary') : 'Warranty' }`;
-                        addSecondaryWarrantyBtn.title = (window.i18n && window.i18n.t) ? window.i18n.t('warranty.addSecondary') : 'Add Secondary Warranty';
+                                ${t('warranty.addSecondary', 'Add Secondary Warranty')}`;
+                        addSecondaryWarrantyBtn.title = t('warranty.addSecondary', 'Add Secondary Warranty');
                         addSecondaryWarrantyBtn.setAttribute('aria-expanded', 'false');
                     } else {
                         fields.style.display = 'block';
@@ -308,8 +321,8 @@ export class ModalManager {
                             <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            ${ (window.i18n && window.i18n.t) ? window.i18n.t('warranty.removeSecondary') : 'Remove Secondary Warranty' }`;
-                        addSecondaryWarrantyBtn.title = (window.i18n && window.i18n.t) ? window.i18n.t('warranty.removeSecondary') : 'Remove Secondary Warranty';
+                            ${t('warranty.removeSecondary', 'Remove Secondary Warranty')}`;
+                        addSecondaryWarrantyBtn.title = t('warranty.removeSecondary', 'Remove Secondary Warranty');
                         addSecondaryWarrantyBtn.setAttribute('aria-expanded', 'true');
                     }
                 }
@@ -457,8 +470,8 @@ export class ModalManager {
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                            ${ (window.i18n && window.i18n.t) ? window.i18n.t('warranty.removeSecondary') : 'Remove Secondary Warranty' }`;
-                    addSecondaryWarrantyBtn.title = (window.i18n && window.i18n.t) ? window.i18n.t('warranty.removeSecondary') : 'Remove Secondary Warranty';
+                            ${t('warranty.removeSecondary', 'Remove Secondary Warranty')}`;
+                    addSecondaryWarrantyBtn.title = t('warranty.removeSecondary', 'Remove Secondary Warranty');
                     addSecondaryWarrantyBtn.setAttribute('aria-expanded', 'true');
                 }
             }
@@ -469,8 +482,8 @@ export class ModalManager {
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                     </svg>
-                    ${ (window.i18n && window.i18n.t) ? window.i18n.t('warranty.addSecondary') : 'Warranty' }`;
-                addSecondaryWarrantyBtn.title = (window.i18n && window.i18n.t) ? window.i18n.t('warranty.addSecondary') : 'Add Secondary Warranty';
+                    ${t('warranty.addSecondary', 'Add Secondary Warranty')}`;
+                addSecondaryWarrantyBtn.title = t('warranty.addSecondary', 'Add Secondary Warranty');
                 addSecondaryWarrantyBtn.setAttribute('aria-expanded', 'false');
             }
         }
@@ -750,13 +763,13 @@ export class ModalManager {
             const newSubAssetData = this.collectSubAssetFormData();
 
             if (!newSubAssetData.name || !newSubAssetData.name.trim()) {
-                const msg = (window.i18n && window.i18n.t) ? window.i18n.t('error.nameRequired') : 'Name is required. Please try again.';
+                const msg = t('error.nameRequired', 'Name is required. Please try again.');
                 globalThis.toaster.show(msg, 'error');
                 this.setButtonLoading(this.subAssetSaveBtn, false);
                 return;
             }
             if (!newSubAssetData.parentId || !newSubAssetData.parentId.trim()) {
-                const msg = (window.i18n && window.i18n.t) ? window.i18n.t('error.parentIdRequired') : 'Parent ID is required. Please try again.';
+                const msg = t('error.parentIdRequired', 'Parent ID is required. Please try again.');
                 globalThis.toaster.show(msg, 'error');
                 this.setButtonLoading(this.subAssetSaveBtn, false);
                 return;

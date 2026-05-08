@@ -24,12 +24,12 @@
                     <h1 id="siteTitle">DumbAssets</h1>
                 </div>
                 <div class="header-actions">
-                    <label for="languageSelect" class="visually-hidden">Language</label>
-                    <select id="languageSelect" aria-label="Language" class="language-select">
-                        <option value="en">English</option>
+                    <label for="languageSelect" class="visually-hidden" data-i18n="language.label">Language</label>
+                    <select id="languageSelect" class="language-select" data-i18n-aria-label="language.label">
+                        <option value="en" data-i18n="language.option.en">English</option>
                         <option value="zh">中文</option>
                     </select>
-                    <button id="homeBtn" class="header-btn" aria-label="Go to Dashboard">
+                    <button id="homeBtn" class="header-btn" data-i18n-aria-label="home.aria">
                         <svg  xmlns="http://www.w3.org/2000/svg">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
@@ -37,14 +37,14 @@
                             <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
                         </svg>
                     </button>
-                    <button id="settingsBtn" class="header-btn" aria-label="Settings">
+                    <button id="settingsBtn" class="header-btn" data-i18n-aria-label="settings.aria">
                         <svg xmlns="http://www.w3.org/2000/svg">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
                             <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
                         </svg>
                     </button>
-                    <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
+                    <button id="themeToggle" class="theme-toggle" data-i18n-aria-label="theme.aria">
                         <svg class="moon">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
@@ -62,7 +62,7 @@
                             <path d="M12 20v2" />
                         </svg>
                     </button>
-                    <button id="sidebarToggle" class="sidebar-toggle hidden" aria-label="Toggle asset list">
+                    <button id="sidebarToggle" class="sidebar-toggle hidden" data-i18n-aria-label="sidebar.aria">
                         <svg id="sidebarOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z" />
@@ -213,7 +213,7 @@
                                         <input type="date" id="assetSecondaryWarrantyExpiration" name="secondaryWarrantyExpiration">
                                         <label class="lifetime-warranty-label">
                                             <input type="checkbox" id="assetSecondaryWarrantyLifetime" name="secondaryWarrantyLifetime">
-                                            Lifetime
+                                            <span data-i18n="asset.lifetime">Lifetime</span>
                                         </label>
                                     </div>
                                 </div>
@@ -277,7 +277,7 @@
                                                     <polyline points="17 8 12 3 7 8"/>
                                                     <line x1="12" y1="3" x2="12" y2="15"/>
                                                 </svg>
-                                                <span>Drag & drop or click to upload photos</span>
+                                                <span data-i18n="file.photos.hint">Drag & drop or click to upload photos</span>
                                             </div>
                                         </div>
                                         <div id="photoPreview" class="preview-grid"></div>
@@ -293,7 +293,7 @@
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                                     <polyline points="14 2 14 8 20 8"/>
                                                 </svg>
-                                                <span>Drag & drop or click to upload receipts</span>
+                                                <span data-i18n="file.receipts.hint">Drag & drop or click to upload receipts</span>
                                             </div>
                                         </div>
                                         <div id="receiptPreview" class="preview-grid"></div>
@@ -309,7 +309,7 @@
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                                     <polyline points="14 2 14 8 20 8"/>
                                                 </svg>
-                                                <span>Drag & drop or click to upload manuals</span>
+                                                <span data-i18n="file.manuals.hint">Drag & drop or click to upload manuals</span>
                                             </div>
                                         </div>
                                         <div id="manualPreview" class="preview-grid"></div>
@@ -318,8 +318,8 @@
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button type="submit" class="save-btn" data-i18n="action.save">Save<div class="spinner"></div></button>
-                            <button type="button" class="cancel-btn" data-i18n="action.cancel">Cancel</button>
+                            <button type="submit" class="save-btn"><span data-i18n="action.save">Save</span><div class="spinner"></div></button>
+                            <button type="button" class="cancel-btn"><span data-i18n="action.cancel">Cancel</span></button>
                         </div>
                     </form>
                 </div>
@@ -385,7 +385,7 @@
                         </div>
                         
                         <div class="form-group warranty-expiration-group">
-                            <label for="subAssetWarrantyExpiration">Warranty Expiration</label>
+                            <label for="subAssetWarrantyExpiration" data-i18n="asset.warrantyExpiration">Warranty Expiration</label>
                             <div class="warranty-expiration-inputs">
                                 <input type="date" id="subAssetWarrantyExpiration" name="warrantyExpiration">
                                 <label class="lifetime-warranty-label">
@@ -431,14 +431,14 @@
 
                         <div id="subAssetFileUploader" class="collapsible-section" data-collapsed="true">
                             <div class="collapsible-header">
-                                <h3>File Attachments</h3>
+                                <h3 data-i18n="file.attachments">File Attachments</h3>
                                 <svg class="collapsible-toggle" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                             </div>
                             <div class="collapsible-content">
                                 <div class="form-group">
-                                    <label for="subAssetPhoto">Photo</label>
+                                    <label for="subAssetPhoto" data-i18n="file.photo">Photo</label>
                                     <div class="file-upload-grid">
                                         <div class="file-upload-box" data-target="subAssetPhoto">
                                             <input type="file" id="subAssetPhoto" accept="image/*" class="file-input" multiple>
@@ -448,14 +448,14 @@
                                                     <polyline points="17 8 12 3 7 8"/>
                                                     <line x1="12" y1="3" x2="12" y2="15"/>
                                                 </svg>
-                                                <span>Drag & drop or click to upload photos</span>
+                                                <span data-i18n="file.photos.hint">Drag & drop or click to upload photos</span>
                                             </div>
                                         </div>
                                         <div id="subPhotoPreview" class="preview-grid"></div>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="subAssetReceipt">Receipt</label>
+                                    <label for="subAssetReceipt" data-i18n="file.receipt">Receipt</label>
                                     <div class="file-upload-grid">
                                         <div class="file-upload-box" data-target="subAssetReceipt">
                                             <input type="file" id="subAssetReceipt" accept=".pdf,.jpg,.jpeg,.png" class="file-input" multiple>
@@ -464,14 +464,14 @@
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                                     <polyline points="14 2 14 8 20 8"/>
                                                 </svg>
-                                                <span>Drag & drop or click to upload receipts</span>
+                                                <span data-i18n="file.receipts.hint">Drag & drop or click to upload receipts</span>
                                             </div>
                                         </div>
                                         <div id="subReceiptPreview" class="preview-grid"></div>
                                     </div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="subAssetManual">Manual</label>
+                                    <label for="subAssetManual" data-i18n="file.manual">Manual</label>
                                     <div class="file-upload-grid">
                                         <div class="file-upload-box" data-target="subAssetManual">
                                             <input type="file" id="subAssetManual" accept=".pdf,.doc,.docx,.md,.txt" class="file-input" multiple>
@@ -480,7 +480,7 @@
                                                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                                                     <polyline points="14 2 14 8 20 8"/>
                                                 </svg>
-                                                <span>Drag & drop or click to upload manuals</span>
+                                                <span data-i18n="file.manuals.hint">Drag & drop or click to upload manuals</span>
                                             </div>
                                         </div>
                                         <div id="subManualPreview" class="preview-grid"></div>
@@ -490,8 +490,8 @@
                         </div>
                         
                         <div class="form-actions">
-                            <button type="submit" class="save-btn">Save<div class="spinner"></div></button>
-                            <button type="button" class="cancel-btn">Cancel</button>
+                            <button type="submit" class="save-btn"><span data-i18n="action.save">Save</span><div class="spinner"></div></button>
+                            <button type="button" class="cancel-btn"><span data-i18n="action.cancel">Cancel</span></button>
                         </div>
                     </form>
                 </div>
@@ -501,7 +501,7 @@
             <div id="importModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 id="importAssetTitle" class="modal-title">Import Assets</h2>
+                        <h2 id="importAssetTitle" class="modal-title" data-i18n="import.title">Import Assets</h2>
                         <div>
                             <span class="close-btn">&times;</span>
                         </div>
@@ -525,73 +525,73 @@
                                 </div>
                             </div>
                             <div class="column-mapping">
-                                <h3>Column Mapping</h3>
+                                <h3 data-i18n="import.columnMapping">Column Mapping</h3>
                                 <div class="mapping-container">
                                     <div class="mapping-row">
-                                        <label>Name:</label>
+                                        <label data-i18n="mapping.name">Name:</label>
                                         <select id="nameColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Manufacturer:</label>
+                                        <label data-i18n="mapping.manufacturer">Manufacturer:</label>
                                         <select id="manufacturerColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Model:</label>
+                                        <label data-i18n="mapping.model">Model:</label>
                                         <select id="modelColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Serial:</label>
+                                        <label data-i18n="mapping.serial">Serial:</label>
                                         <select id="serialColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Purchase Date:</label>
+                                        <label data-i18n="mapping.purchaseDate">Purchase Date:</label>
                                         <select id="purchaseDateColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Purchase Price:</label>
+                                        <label data-i18n="mapping.purchasePrice">Purchase Price:</label>
                                         <select id="purchasePriceColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Quantity:</label>
+                                        <label data-i18n="mapping.quantity">Quantity:</label>
                                         <select id="quantityColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Notes:</label>
+                                        <label data-i18n="mapping.notes">Notes:</label>
                                         <select id="notesColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>URL:</label>
+                                        <label data-i18n="mapping.url">URL:</label>
                                         <select id="urlColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Warranty:</label>
+                                        <label data-i18n="mapping.warranty">Warranty:</label>
                                         <select id="warrantyColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Warranty Expiration:</label>
+                                        <label data-i18n="mapping.warrantyExpiration">Warranty Expiration:</label>
                                         <select id="warrantyExpirationColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Lifetime:</label>
+                                        <label data-i18n="mapping.lifetime">Lifetime:</label>
                                         <select id="lifetimeColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>2nd Warranty Scope:</label>
+                                        <label data-i18n="mapping.secondaryWarranty">2nd Warranty Scope:</label>
                                         <select id="secondaryWarrantyColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>2nd Warranty Expiration:</label>
+                                        <label data-i18n="mapping.secondaryWarrantyExpiration">2nd Warranty Expiration:</label>
                                         <select id="secondaryWarrantyExpirationColumn" class="column-select"></select>
                                     </div>
                                     <div class="mapping-row">
-                                        <label>Tags:</label>
+                                        <label data-i18n="mapping.tags">Tags:</label>
                                         <select id="tagsColumn" class="column-select"></select>
                                     </div>
                                 </div>
                             </div>
                             <div class="import-actions">
-                                <button id="downloadTemplateBtn" class="action-button">Download Template</button>
-                                <button id="startImportBtn" class="action-button" disabled>Start Import<div class="spinner"></div></button>
+                                <button id="downloadTemplateBtn" class="action-button" data-i18n="import.downloadTemplate">Download Template</button>
+                                <button id="startImportBtn" class="action-button" disabled><span data-i18n="import.startImport">Start Import</span><div class="spinner"></div></button>
                             </div>
                         </div>
                     </div>
@@ -602,7 +602,7 @@
             <div id="settingsModal" class="modal">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h2 id="settingsTitle" class="modal-title">Settings</h2>
+                        <h2 id="settingsTitle" class="modal-title" data-i18n="settings.title">Settings</h2>
                         <div class="close-btn">
                             <span>&times;</span>
                         </div>
@@ -712,7 +712,7 @@
                                             </div>
                                         </fieldset>
                                         <fieldset>
-                                            <legend>Toggle Sections</legend>
+                                            <legend data-i18n="settings.legend.toggleSections">Toggle Sections</legend>
                                             <div id="dashboardSectionToggles" class="settings-grid">
                                                 <div class="toggle-row">
                                                     <span data-i18n="toggle.showAnalytics">Show Analytics</span>
@@ -745,7 +745,7 @@
                                             </div>
                                         </fieldset>
                                         <fieldset>
-                                            <legend>Toggle Cards</legend>
+                                            <legend data-i18n="settings.legend.toggleCards">Toggle Cards</legend>
                                             <div id="dashboardCardToggles" class="settings-grid">
                                                 <div class="toggle-row">
                                                     <span data-i18n="card.totalAssets">Total Assets</span>
@@ -812,7 +812,7 @@
                                 <div class="tab-pane" id="system-tab">
                                     <form id="systemSettingsForm">
                                         <fieldset>
-                                            <legend>Data Export</legend>
+                                            <legend data-i18n="settings.legend.export">Data Export</legend>
                                                 <div class="export-section">
                                                     <div>
                                                         <button type="button" id="exportDataBtn" class="action-button export-btn">
@@ -821,7 +821,7 @@
                                                                 <path d="M7 10l5 5 5-5"></path>
                                                                 <path d="M12 15V3"></path>
                                                             </svg>
-                                                            Export All Data CSV
+                                                            <span data-i18n="button.exportAllCsv">Export All Data CSV</span>
                                                             <div class="spinner"></div>
                                                         </button>
                                                     </div>
@@ -832,7 +832,7 @@
                                                                 <path d="M7 10l5 5 5-5"></path>
                                                                 <path d="M12 15V3"></path>
                                                             </svg>
-                                                            Export Simple CSV
+                                                            <span data-i18n="button.exportSimpleCsv">Export Simple CSV</span>
                                                             <div class="spinner"></div>
                                                         </button>
                                                     </div>
@@ -844,9 +844,9 @@
                             
                             <!-- Settings modal actions - now outside of individual forms -->
                             <div class="modal-actions">
-                                <button type="button" id="saveSettings" class="action-button">Save<div class="spinner"></div></button>
-                                <button type="button" id="cancelSettings" class="action-button" style="background: var(--secondary-color);">Cancel</button>
-                                <button type="button" id="testNotificationSettings" class="action-button" style="background: var(--success-color);">Test<div class="spinner"></div></button>
+                                <button type="button" id="saveSettings" class="action-button"><span data-i18n="button.save">Save</span><div class="spinner"></div></button>
+                                <button type="button" id="cancelSettings" class="action-button" style="background: var(--secondary-color);"><span data-i18n="button.cancel">Cancel</span></button>
+                                <button type="button" id="testNotificationSettings" class="action-button" style="background: var(--success-color);"><span data-i18n="button.test">Test</span><div class="spinner"></div></button>
                             </div>
                             </div>
                         </div>
@@ -855,7 +855,7 @@
             </div>
         </div>
     </main>
-    <div class="dumbware-credit">
+    <div class="dumbware-credit" data-i18n="credit.builtBy">
         Built by <a href="https://dumbware.io" target="_blank" rel="noopener noreferrer">DumbWare</a>
     </div>
     <div id="toast-container" class="toast-container"></div>

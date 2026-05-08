@@ -3,6 +3,34 @@
  * Provides centralized functions for rendering file previews consistently across the application
  */
 
+const t = (key, fallback, params = {}) => {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+        Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+    ));
+};
+
+const getDocumentTypeLabel = (type) => {
+    switch (type) {
+        case 'receipt':
+            return t('file.receipt', 'Receipt');
+        case 'manual':
+            return t('file.manual', 'Manual');
+        case 'import':
+            return t('import.title', 'Import');
+        default:
+            return t('file.document', 'Document');
+    }
+};
+
 /**
  * Create a photo preview element
  * 
@@ -19,11 +47,11 @@ export function createPhotoPreview(filePath, onDeleteCallback, fileName = null, 
         fileName = filePath.split('/').pop();
     }
     
-    const deleteImageTitle = (window.i18n && window.i18n.t) ? window.i18n.t('action.deleteImage') : 'Delete Image';
+    const deleteImageTitle = t('action.deleteImage', 'Delete Image');
     previewItem.innerHTML = `
         <div class="file-preview">
             <div class="preview-content">
-                <img src="${filePath}" alt="Photo Preview">
+                <img src="${filePath}" alt="${t('file.photo', 'Photo')}">
             </div>
         </div>
             <button type="button" class="delete-preview-btn" title="${deleteImageTitle}">
@@ -59,23 +87,8 @@ export function createDocumentPreview(type, filePath, onDeleteCallback, fileName
     const previewItem = document.createElement('div');
     previewItem.className = 'file-preview-item';
     
-    let typeLabel = (window.i18n && window.i18n.t) ? window.i18n.t('file.document') : 'Manual';
-    switch (type) {
-        case 'receipt':
-            typeLabel = (window.i18n && window.i18n.t) ? window.i18n.t('file.receipt') || 'Receipt' : 'Receipt';
-            break;
-        case 'manual':
-            typeLabel = (window.i18n && window.i18n.t) ? window.i18n.t('file.manual') || 'Manual' : 'Manual';
-            break;
-        case 'import':
-            typeLabel = (window.i18n && window.i18n.t) ? window.i18n.t('import.title') || 'Import' : 'Import';
-            break;
-        default:
-            typeLabel = (window.i18n && window.i18n.t) ? window.i18n.t('file.document') || 'Document' : 'Document';
-            break;
-    }
-    const titleTemplate = (window.i18n && window.i18n.t) ? window.i18n.t('action.deleteDocument') : 'Delete {type}';
-    const title = titleTemplate.replace('{type}', typeLabel);
+    const typeLabel = getDocumentTypeLabel(type);
+    const title = t('action.deleteDocument', 'Delete {type}', { type: typeLabel });
 
     const fileIcon = type === 'receipt' 
       ? `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -110,7 +123,7 @@ export function createDocumentPreview(type, filePath, onDeleteCallback, fileName
             </svg>
         </button>
         <div class="file-info-pill">
-            <span class="file-name">${fileName || ((window.i18n && window.i18n.t) ? window.i18n.t('file.document') : 'Document')}</span>
+            <span class="file-name">${fileName || t('file.document', 'Document')}</span>
         </div>
     `;
     
@@ -137,9 +150,9 @@ export function createDocumentPreview(type, filePath, onDeleteCallback, fileName
 export function setupFilePreview(container, type, displayPath, originalPath, fileInput, modalManager, fileName = null, fileSize = null) {
     if (!container || !displayPath) return;
 
-    const confirmTemplate = (window.i18n && window.i18n.t) ? window.i18n.t('confirm.deleteFile') : 'Are you sure you want to delete this {type}?';
-    const localizedTypeLabel = (type === 'receipt') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.receipt') || 'Receipt') : 'Receipt') : ((type === 'manual') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.manual') || 'Manual') : 'Manual') : ((window.i18n && window.i18n.t) ? (window.i18n.t('file.document') || 'Document') : 'Document'));
-    const confirmMessage = confirmTemplate.replace('{type}', localizedTypeLabel);
+    const confirmMessage = t('confirm.deleteFile', 'Are you sure you want to delete this {type}?', {
+        type: getDocumentTypeLabel(type)
+    });
     
     const onDelete = () => {
         if (confirm(confirmMessage)) {
@@ -188,9 +201,9 @@ export function setupExistingFilePreview(container, type, displayPath, originalP
     }
 
     // Create the delete handler that integrates with the modal manager's filesToDelete system
-    const confirmTemplate2 = (window.i18n && window.i18n.t) ? window.i18n.t('confirm.deleteFile') : 'Are you sure you want to delete this {type}?';
-    const localizedTypeLabel2 = (type === 'receipt') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.receipt') || 'Receipt') : 'Receipt') : ((type === 'manual') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.manual') || 'Manual') : 'Manual') : ((window.i18n && window.i18n.t) ? (window.i18n.t('file.document') || 'Document') : 'Document'));
-    const confirmMessage = confirmTemplate2.replace('{type}', localizedTypeLabel2);
+    const confirmMessage = t('confirm.deleteFile', 'Are you sure you want to delete this {type}?', {
+        type: getDocumentTypeLabel(type)
+    });
     const onDelete = () => {
         if (confirm(confirmMessage)) {
             // Remove the preview element

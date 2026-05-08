@@ -17,7 +17,7 @@ import { formatFileSize } from '/src/services/fileUpload/utils.js';
 import { 
     initRenderer, 
     updateState, 
-    updateSelectedIds, 
+    updateSelectedIds as updateRendererSelectedIds, 
     renderAssetDetails,
     formatFilePath,
     // Import list renderer functions
@@ -46,6 +46,21 @@ import { ModalManager } from './managers/modalManager.js';
 import { DashboardManager } from './managers/dashboardManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    const t = (key, fallback, params = {}) => {
+        let template;
+        if (window.i18n && window.i18n.t) {
+            template = window.i18n.t(key);
+            if (!template || template === key) {
+                template = fallback;
+            }
+        } else {
+            template = fallback;
+        }
+        return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+            Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+        ));
+    };
+
     // Initialize variables for app state
     let assets = [];
     let subAssets = [];
@@ -53,6 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let selectedSubAssetId = null;
     let dashboardFilter = 'all';
     let currentSort = { field: 'updatedAt', direction: 'desc' };
+
+    function updateSelectedIds(assetId, subAssetId) {
+        selectedAssetId = assetId;
+        selectedSubAssetId = subAssetId;
+        updateRendererSelectedIds(assetId, subAssetId);
+        updateListState(assets, subAssets, selectedAssetId);
+    }
 
     // Local function to update dashboard filter and keep modules in sync
     function updateDashboardFilter(filter) {
@@ -336,6 +358,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 sidebarOverlay.style.pointerEvents = 'auto';
             }
         });
+
+        document.addEventListener('i18n:changed', () => {
+            renderLocalizedView();
+        });
+    }
+
+    function renderLocalizedView() {
+        renderAssetList(searchInput ? searchInput.value : '');
+
+        if (dashboardManager) {
+            if (selectedSubAssetId) {
+                renderAssetDetails(selectedSubAssetId, true);
+            } else if (selectedAssetId) {
+                renderAssetDetails(selectedAssetId, false);
+            } else {
+                dashboardManager.renderDashboard(false);
+            }
+        }
+
+        if (siteTitleElem && window.appConfig?.siteTitle) {
+            siteTitleElem.textContent = window.appConfig.siteTitle;
+        }
+        if (pageTitleElem && window.appConfig?.siteTitle) {
+            pageTitleElem.textContent = window.appConfig.siteTitle;
+        }
     }
 
     // Button loading state handler
@@ -492,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Show success message
             const assetMsgKey = isEditMode ? 'asset.updated' : 'asset.added';
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t(assetMsgKey) : (isEditMode ? "Asset updated successfully!" : "Asset added successfully!"));
+            globalThis.toaster.show(t(assetMsgKey, isEditMode ? 'Asset updated successfully!' : 'Asset added successfully!'));
             setButtonLoading(saveBtn, false);
         } catch (error) {
             globalThis.logError('Error saving asset:', error.message);
@@ -566,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Show success message
             const compMsgKey = isEditMode ? 'component.updated' : 'component.added';
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t(compMsgKey) : (isEditMode ? "Component updated successfully!" : "Component added successfully!"));
+            globalThis.toaster.show(t(compMsgKey, isEditMode ? 'Component updated successfully!' : 'Component added successfully!'));
             setButtonLoading(saveBtn, false);
         } catch (error) {
             globalThis.logError('Error saving component:', error.message);
@@ -576,7 +623,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function deleteAsset(assetId) {
-        if (!confirm((window.i18n && window.i18n.t) ? window.i18n.t('confirm.deleteAsset') : 'Are you sure you want to delete this asset? This will also delete all its components.')) {
+        if (!confirm(t('confirm.deleteAsset', 'Are you sure you want to delete this asset? This will also delete all its components.'))) {
             return;
         }
         
@@ -593,14 +640,14 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSelectedIds(null, null);
             await refreshAllData();
             dashboardManager.renderDashboard();
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('asset.deleted') : "Asset deleted successfully!");
+            globalThis.toaster.show(t('asset.deleted', 'Asset deleted successfully!'));
         } catch (error) {
             globalThis.logError('Error deleting asset:', error.message);
         }
     }
 
     async function deleteSubAsset(subAssetId) {
-        if (!confirm((window.i18n && window.i18n.t) ? window.i18n.t('confirm.deleteComponent') : 'Are you sure you want to delete this component? This will also delete any sub-components.')) {
+        if (!confirm(t('confirm.deleteComponent', 'Are you sure you want to delete this component? This will also delete any sub-components.'))) {
             return;
         }
         
@@ -638,7 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await refreshAssetDetails(parentAssetId, false);
             }
             
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('component.deleted') : "Component deleted successfully!");
+            globalThis.toaster.show(t('component.deleted', 'Component deleted successfully!'));
         } catch (error) {
             globalThis.logError('Error deleting component:', error.message);
         }
@@ -732,7 +779,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const subAssetHeader = subAssetContainer.querySelector('.sub-asset-header');
         if (subAssetHeader) {
             subAssetHeader.innerHTML = `
-            <button id="addSubAssetBtn" class="add-sub-asset-btn">${(window.i18n && window.i18n.t) ? window.i18n.t('add.subcomponent') : '+ Add Component'}</button>
+            <button id="addSubAssetBtn" class="add-sub-asset-btn">${t('add.subcomponent', '+ Add Component')}</button>
             `;
             const addSubAssetBtn = subAssetHeader.querySelector('#addSubAssetBtn');
             if (addSubAssetBtn) {
@@ -742,7 +789,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Render the sub-asset list
         if (parentSubAssets.length === 0) {
-            const emptyMsg = (window.i18n && window.i18n.t) ? window.i18n.t('empty.noComponents') : 'No components found. Add your first component.';
+            const emptyMsg = t('empty.noComponents', 'No components found. Add your first component.');
             subAssetList.innerHTML = `
             <div class="empty-state">
                 <p>${emptyMsg}</p>
@@ -797,10 +844,10 @@ document.addEventListener('DOMContentLoaded', () => {
             ${warrantyDot}
             <div class="sub-asset-title">${subAsset.name}</div>
             <div class="sub-asset-actions">
-                <button class="edit-sub-btn" data-id="${subAsset.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.edit') : 'Edit'}">
+                <button class="edit-sub-btn" data-id="${subAsset.id}" title="${t('action.edit', 'Edit')}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
                 </button>
-                <button class="delete-sub-btn" data-id="${subAsset.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.delete') : 'Delete'}">
+                <button class="delete-sub-btn" data-id="${subAsset.id}" title="${t('action.delete', 'Delete')}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
             </div>
@@ -966,10 +1013,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${childWarrantyDot}
                         <div class="sub-asset-title">${child.name}</div>
                         <div class="sub-asset-actions">
-                            <button class="edit-sub-btn" data-id="${child.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.edit') : 'Edit'}">
+                            <button class="edit-sub-btn" data-id="${child.id}" title="${t('action.edit', 'Edit')}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
                             </button>
-                            <button class="delete-sub-btn" data-id="${child.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.delete') : 'Delete'}">
+                            <button class="delete-sub-btn" data-id="${child.id}" title="${t('action.delete', 'Delete')}">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                             </button>
                         </div>
@@ -1175,9 +1222,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Add secondary warranty info if it exists
         let detailsHtml = '';
         if (item.secondaryWarranty) {
-            const secLabel = (window.i18n && window.i18n.t) ? window.i18n.t('asset.secondaryWarrantyLabel') : 'Secondary Warranty';
-            const secExpLabel = (window.i18n && window.i18n.t) ? window.i18n.t('mapping.secondaryWarrantyExpiration') : 'Secondary Warranty Expiration';
-            const naText = (window.i18n && window.i18n.t) ? window.i18n.t('word.na') : 'N/A';
+            const secLabel = t('asset.secondaryWarrantyLabel', 'Secondary Warranty');
+            const secExpLabel = t('mapping.secondaryWarrantyExpiration', 'Secondary Warranty Expiration');
+            const naText = t('word.na', 'N/A');
             detailsHtml += `
                 <div class="info-item">
                     <div class="info-label">${secLabel}</div>
@@ -1230,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = Array.from(tags).map(tag => `
                 <span class="tag">
                     ${tag}
-                    <button class="remove-tag" data-tag="${tag}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.removeTag') : 'Remove tag'}">
+                    <button class="remove-tag" data-tag="${tag}" title="${t('action.removeTag', 'Remove tag')}">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1355,13 +1402,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (!targetAsset) {
                 console.error('Asset not found for ID:', assetId);
-                globalThis.toaster?.show('Asset not found', 'error');
+                globalThis.toaster?.show(t('asset.notFound', 'Asset not found'), 'error');
                 return false;
             }
             
             if (subAssetId && !targetSubAsset) {
                 console.error('Sub-asset not found for ID:', subAssetId);
-                globalThis.toaster?.show('Component not found', 'error');
+                globalThis.toaster?.show(t('component.notFound', 'Component not found'), 'error');
                 return false;
             }
             

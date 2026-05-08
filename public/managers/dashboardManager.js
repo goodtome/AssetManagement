@@ -4,6 +4,44 @@
  */
 import { formatDate } from '../helpers/utils.js';
 
+const t = (key, fallback, params = {}) => {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+        Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+    ));
+};
+
+const localizeUnit = (unit, count = 2) => {
+    const normalized = String(unit || '').toLowerCase();
+    const singular = Number(count) === 1;
+    const keyMap = {
+        day: singular ? 'time.day' : 'time.days',
+        days: singular ? 'time.day' : 'time.days',
+        week: singular ? 'time.week' : 'time.weeks',
+        weeks: singular ? 'time.week' : 'time.weeks',
+        month: singular ? 'time.month' : 'time.months',
+        months: singular ? 'time.month' : 'time.months',
+        year: singular ? 'time.year' : 'time.years',
+        years: singular ? 'time.year' : 'time.years'
+    };
+    return keyMap[normalized] ? t(keyMap[normalized], unit) : unit;
+};
+
+const formatRecurringSchedule = (frequency, unit) => (
+    t('maintenance.every', 'Every {frequency} {unit}', {
+        frequency,
+        unit: localizeUnit(unit, frequency)
+    })
+);
+
 export class DashboardManager {
     constructor({
         // DOM elements
@@ -196,19 +234,19 @@ export class DashboardManager {
         // Prepare HTML sections for each dashboard component
         const totalsSection = sectionVisibility.totals ? `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.totals') : 'Totals'}</legend>
+                <legend class="dashboard-legend-title">${t('dashboard.section.totals', 'Totals')}</legend>
                 <div class="dashboard-section" data-section="totals">
                     <div class="dashboard-cards totals-cards">
                         ${cardVisibility.assets !== false ? `<div class="dashboard-card card-total${!dashboardFilter ? ' active' : ''}" data-filter="all">
-                            <div class="card-label">Assets</div>
+                            <div class="card-label">${t('dashboard.card.assets', 'Assets')}</div>
                             <div class="card-value">${totalAssets}</div>
                         </div>` : ''}
                         ${cardVisibility.components !== false ? `<div class="dashboard-card card-components${dashboardFilter === 'components' ? ' active' : ''}" data-filter="components">
-                            <div class="card-label">Components</div>
+                            <div class="card-label">${t('dashboard.card.components', 'Components')}</div>
                             <div class="card-value">${totalComponents}</div>
                         </div>` : ''}
                         ${cardVisibility.value !== false ? `<div class="dashboard-card card-asset-value" data-filter="value">
-                            <div class="card-label">Value</div>
+                            <div class="card-label">${t('dashboard.card.value', 'Value')}</div>
                             <div class="card-value">${this.formatCurrency(totalValue)}</div>
                         </div>` : ''}
                     </div>
@@ -217,27 +255,27 @@ export class DashboardManager {
             
         const warrantiesSection = sectionVisibility.warranties ? `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.warranties') : 'Warranties'}</legend>
+                <legend class="dashboard-legend-title">${t('dashboard.section.warranties', 'Warranties')}</legend>
                 <div class="dashboard-section dashboard-warranty-section" data-section="warranties">
                     <div class="dashboard-cards warranty-cards">
                         ${cardVisibility.warranties !== false ? `<div class="dashboard-card card-warranties${dashboardFilter === 'warranties' ? ' active' : ''}" data-filter="warranties">
-                            <div class="card-label">Total</div>
+                            <div class="card-label">${t('dashboard.card.total', 'Total')}</div>
                             <div class="card-value">${allWarranties.length}</div>
                         </div>` : ''}
                         ${cardVisibility.within60 !== false ? `<div class="dashboard-card card-within60${dashboardFilter === 'within60' ? ' active' : ''}" data-filter="within60">
-                            <div class="card-label">In 60 days</div>
+                            <div class="card-label">${t('dashboard.card.within60', 'In 60 days')}</div>
                             <div class="card-value">${within60}</div>
                         </div>` : ''}
                         ${cardVisibility.within30 !== false ? `<div class="dashboard-card card-within30${dashboardFilter === 'within30' ? ' active' : ''}" data-filter="within30">
-                            <div class="card-label">In 30 days</div>
+                            <div class="card-label">${t('dashboard.card.within30', 'In 30 days')}</div>
                             <div class="card-value">${within30}</div>
                         </div>` : ''}
                         ${cardVisibility.expired !== false ? `<div class="dashboard-card card-expired${dashboardFilter === 'expired' ? ' active' : ''}" data-filter="expired">
-                            <div class="card-label">Expired</div>
+                            <div class="card-label">${t('dashboard.card.expired', 'Expired')}</div>
                             <div class="card-value">${expired}</div>
                         </div>` : ''}
                         ${cardVisibility.active !== false ? `<div class="dashboard-card card-active${dashboardFilter === 'active' ? ' active' : ''}" data-filter="active">
-                            <div class="card-label">Active</div>
+                            <div class="card-label">${t('dashboard.card.active', 'Active')}</div>
                             <div class="card-value">${active}</div>
                         </div>` : ''}
                     </div>
@@ -249,19 +287,19 @@ export class DashboardManager {
         
         const analyticsSection = sectionVisibility.analytics ? `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.analytics') : 'Analytics'}</legend>
+                <legend class="dashboard-legend-title">${t('dashboard.section.analytics', 'Analytics')}</legend>
                 <div class="dashboard-section" data-section="analytics">
                     <div class="dashboard-charts-section three-col">
                         <div class="chart-container">
-                            <h3>${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.analytics.warrantyStatus') : 'Warranty Status'}</h3>
+                            <h3>${t('dashboard.analytics.warrantyStatus', 'Warranty Status')}</h3>
                             <canvas id="warrantyPieChart" class="chart-canvas"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3>${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.analytics.warrantiesOverTime') : 'Warranties Expiring Over Time'}</h3>
+                            <h3>${t('dashboard.analytics.warrantiesOverTime', 'Warranties Expiring Over Time')}</h3>
                             <canvas id="warrantyLineChart" class="chart-canvas"></canvas>
                         </div>
                         <div class="chart-container">
-                            <h3>${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.analytics.upcomingMaintenanceEvents') : 'Upcoming Maintenance Events'}</h3>
+                            <h3>${t('dashboard.analytics.upcomingMaintenanceEvents', 'Upcoming Maintenance Events')}</h3>
                             <canvas id="maintenanceLineChart" class="chart-canvas"></canvas>
                         </div>
                     </div>
@@ -285,7 +323,7 @@ export class DashboardManager {
         
         // Set the dashboard HTML with ordered sections
         this.subAssetContainer.classList.add('hidden');
-        const overviewTitle = (window.i18n && window.i18n.t) ? window.i18n.t('asset.overview') : 'Asset Overview';
+        const overviewTitle = t('asset.overview', 'Asset Overview');
         this.assetDetails.innerHTML = `
             <fieldset class="dashboard-legend">
                 <legend class="dashboard-legend-title">${overviewTitle}</legend>
@@ -364,7 +402,7 @@ export class DashboardManager {
         
         return `
             <fieldset class="dashboard-legend">
-                <legend class="dashboard-legend-title">${(window.i18n && window.i18n.t) ? window.i18n.t('dashboard.section.events') : 'Events'}</legend>
+                <legend class="dashboard-legend-title">${t('dashboard.section.events', 'Events')}</legend>
                 <div class="dashboard-section" data-section="events">
                     <div class="events-controls">
                         <div class="events-filters">
@@ -374,7 +412,7 @@ export class DashboardManager {
                                     <path d="M12 1v6m0 6v6"></path>
                                     <path d="m21 12-6-3-6 3-6-3"></path>
                                 </svg>
-                                All
+                                ${t('dashboard.filter.all', 'All')}
                             </button>
                             <button class="events-filter-btn" data-filter="warranty">
                                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -384,13 +422,13 @@ export class DashboardManager {
                                     <line x1="16" y1="17" x2="8" y2="17"></line>
                                     <polyline points="10,9 9,9 8,9"></polyline>
                                 </svg>
-                                Warranty
+                                ${t('dashboard.filter.warranty', 'Warranty')}
                             </button>
                             <button class="events-filter-btn" data-filter="maintenance">
                                 <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
                                 </svg>
-                                Maintenance
+                                ${t('dashboard.filter.maintenance', 'Maintenance')}
                             </button>
                         </div>
                         <div class="events-sort">
@@ -405,13 +443,13 @@ export class DashboardManager {
                                     <input type="date" id="eventsSpecificDate" class="events-date-input" value="${specificDate || ''}">
                                 </div>
                                 <select id="eventsDateRange" class="events-date-select">
-                                    <option value="past"${savedDateRange === 'past' ? ' selected' : ''}>Past Events</option>
-                                    <option value="1"${savedDateRange === '1' ? ' selected' : ''}>1 Month</option>
-                                    <option value="3"${savedDateRange === '3' ? ' selected' : ''}>3 Months</option>
-                                    <option value="6"${savedDateRange === '6' ? ' selected' : ''}>6 Months</option>
-                                    <option value="12"${savedDateRange === '12' ? ' selected' : ''}>1 Year</option>
-                                    <option value="all"${savedDateRange === 'all' ? ' selected' : ''}>All Future</option>
-                                    <option value="specific"${savedDateRange.startsWith && savedDateRange.startsWith('specific:') ? ' selected' : ''}>${specificDateDisplay ? specificDateDisplay : 'Specific Date'}</option>
+                                    <option value="past"${savedDateRange === 'past' ? ' selected' : ''}>${t('dashboard.range.past', 'Past Events')}</option>
+                                    <option value="1"${savedDateRange === '1' ? ' selected' : ''}>${t('dashboard.range.1month', '1 Month')}</option>
+                                    <option value="3"${savedDateRange === '3' ? ' selected' : ''}>${t('dashboard.range.3months', '3 Months')}</option>
+                                    <option value="6"${savedDateRange === '6' ? ' selected' : ''}>${t('dashboard.range.6months', '6 Months')}</option>
+                                    <option value="12"${savedDateRange === '12' ? ' selected' : ''}>${t('dashboard.range.1year', '1 Year')}</option>
+                                    <option value="all"${savedDateRange === 'all' ? ' selected' : ''}>${t('dashboard.range.allFuture', 'All Future')}</option>
+                                    <option value="specific"${savedDateRange.startsWith && savedDateRange.startsWith('specific:') ? ' selected' : ''}>${specificDateDisplay ? specificDateDisplay : t('dashboard.range.specific', 'Specific Date')}</option>
                                 </select>
                             </div>
                             <button class="events-sort-btn" data-sort="date" data-direction="asc">
@@ -702,7 +740,7 @@ export class DashboardManager {
                         type: 'warranty',
                         date: expDate,
                         name: asset.name,
-                        details: 'Warranty Expiration',
+                        details: t('dashboard.event.warrantyExpiration', 'Warranty Expiration'),
                         assetType: 'Asset',
                         warrantyType: 'Primary',
                         id: asset.id,
@@ -720,7 +758,7 @@ export class DashboardManager {
                         type: 'warranty',
                         date: expDate,
                         name: asset.name,
-                        details: 'Secondary Warranty Expiration',
+                        details: t('dashboard.event.secondaryWarrantyExpiration', 'Secondary Warranty Expiration'),
                         assetType: 'Asset',
                         warrantyType: 'Secondary',
                         id: asset.id,
@@ -748,7 +786,7 @@ export class DashboardManager {
                                 type: 'maintenance',
                                 date: eventDate,
                                 name: asset.name,
-                                details: `${event.name} (Every ${event.frequency} ${event.frequencyUnit})`,
+                                details: `${event.name} (${formatRecurringSchedule(event.frequency, event.frequencyUnit)})`,
                                 assetType: 'Asset',
                                 notes: event.notes,
                                 id: asset.id,
@@ -778,7 +816,7 @@ export class DashboardManager {
         // Collect warranty events from filtered sub-assets
         filteredSubAssets.forEach(subAsset => {
             // Determine parent information based on whether this is a sub-asset or sub-sub-asset
-            let parentName = 'Unknown Parent';
+            let parentName = t('asset.unknownParent', 'Unknown Parent');
             let assetType = 'Component';
             
             if (subAsset.parentSubId) {
@@ -796,7 +834,7 @@ export class DashboardManager {
             } else {
                 // This is a regular sub-asset (component of an asset)
                 const parentAsset = assets.find(a => a.id === subAsset.parentId);
-                parentName = parentAsset ? parentAsset.name : 'Unknown Parent';
+                parentName = parentAsset ? parentAsset.name : t('asset.unknownParent', 'Unknown Parent');
                 assetType = 'Component';
             }
 
@@ -818,7 +856,7 @@ export class DashboardManager {
                         type: 'warranty',
                         date: expDate,
                         name: subAsset.name,
-                        details: 'Warranty Expiration',
+                        details: t('dashboard.event.warrantyExpiration', 'Warranty Expiration'),
                         assetType: assetType,
                         parentAsset: parentName,
                         id: subAsset.id,
@@ -846,7 +884,7 @@ export class DashboardManager {
                                 type: 'maintenance',
                                 date: eventDate,
                                 name: subAsset.name,
-                                details: `${event.name} (Every ${event.frequency} ${event.frequencyUnit})`,
+                                details: `${event.name} (${formatRecurringSchedule(event.frequency, event.frequencyUnit)})`,
                                 assetType: assetType,
                                 parentAsset: parentName,
                                 notes: event.notes,
@@ -1061,7 +1099,7 @@ export class DashboardManager {
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M12 6v6l4 2"></path>
                     </svg>
-                    <p>No events found</p>
+                    <p>${t('empty.noEvents', 'No events found')}</p>
                 </div>
             `;
         }
@@ -1095,17 +1133,17 @@ export class DashboardManager {
                 <div class="event-row ${urgencyClass}" data-type="${event.type}" data-id="${event.id}" data-is-sub-asset="${event.isSubAsset}" style="cursor: pointer;">
                     <div class="event-type">
                         ${typeIcon}
-                        <span class="event-type-pill ${event.type}">${event.type === 'warranty' ? 'Warranty' : 'Maintenance'}</span>
+                        <span class="event-type-pill ${event.type}">${event.type === 'warranty' ? t('dashboard.filter.warranty', 'Warranty') : t('dashboard.filter.maintenance', 'Maintenance')}</span>
                     </div>
                     <div class="event-date">
                         <span class="event-date-text">${this.formatDate(event.date)}</span>
-                        <span class="event-days-until">${isPast ? `${Math.abs(daysUntil)} days past` : `${daysUntil} days`}</span>
+                        <span class="event-days-until">${isPast ? t('dashboard.event.daysPast', '{count} days past', { count: Math.abs(daysUntil) }) : t('dashboard.event.days', '{count} days', { count: daysUntil })}</span>
                     </div>
                     <div class="event-details">
                         <div class="event-name">${event.name}</div>
                         <div class="event-description">${event.details}</div>
-                        ${(event.assetType === 'Component' || event.assetType === 'Sub-Component') && event.parentAsset ? `<div class="event-parent">Parent: ${event.parentAsset}</div>` : ''}
-                        ${event.notes ? `<div class="event-notes">Notes: ${event.notes}</div>` : ''}
+                        ${(event.assetType === 'Component' || event.assetType === 'Sub-Component') && event.parentAsset ? `<div class="event-parent">${t('dashboard.event.parent', 'Parent: {name}', { name: event.parentAsset })}</div>` : ''}
+                        ${event.notes ? `<div class="event-notes">${t('maintenance.notesLabel', 'Notes:')} ${event.notes}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -1222,7 +1260,7 @@ export class DashboardManager {
                     // Reset the "Specific Date" option text back to default
                     const specificOption = eventsDateRangeSelect.querySelector('option[value="specific"]');
                     if (specificOption) {
-                        specificOption.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('date.specific') : 'Specific Date';
+                        specificOption.textContent = t('date.specific', 'Specific Date');
                     }
                     
                     // Save the selection and update display
@@ -1299,7 +1337,7 @@ export class DashboardManager {
                     // Reset dropdown option text
                     const specificOption = eventsDateRangeSelect.querySelector('option[value="specific"]');
                     if (specificOption) {
-                        specificOption.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('date.specific') : 'Specific Date';
+                        specificOption.textContent = t('date.specific', 'Specific Date');
                     }
 
                     // Hide the calendar icon
@@ -1564,14 +1602,18 @@ export class DashboardManager {
         let paginationHTML = `
             <div class="events-pagination">
                 <div class="events-pagination-info">
-                    Showing ${((this.currentPage - 1) * this.eventsPerPage) + 1}-${Math.min(this.currentPage * this.eventsPerPage, totalEvents)} of ${totalEvents} events
+                    ${t('dashboard.pagination.summary', 'Showing {start}-{end} of {total} events', {
+                        start: ((this.currentPage - 1) * this.eventsPerPage) + 1,
+                        end: Math.min(this.currentPage * this.eventsPerPage, totalEvents),
+                        total: totalEvents
+                    })}
                 </div>
                 <div class="events-pagination-controls">
                     <button class="events-prev-btn ${this.currentPage === 1 ? 'disabled' : ''}" ${this.currentPage === 1 ? 'disabled' : ''}>
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
-                        Previous
+                        ${t('dashboard.pagination.previous', 'Previous')}
                     </button>
                     <div class="events-pagination-numbers">
         `;
@@ -1597,7 +1639,7 @@ export class DashboardManager {
         paginationHTML += `
                     </div>
                     <button class="events-next-btn ${this.currentPage === totalPages ? 'disabled' : ''}" ${this.currentPage === totalPages ? 'disabled' : ''}>
-                        Next
+                        ${t('dashboard.pagination.next', 'Next')}
                         <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
@@ -1655,6 +1697,11 @@ export class DashboardManager {
                 }
             });
         }
+
+        // Add language change event listener to re-render dashboard
+        document.addEventListener('i18n:changed', async () => {
+            await this.renderDashboard(false);
+        });
     }
     
     /**

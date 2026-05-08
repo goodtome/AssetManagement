@@ -8,6 +8,13 @@ export class ChartManager {
         this.formatDate = formatDate;
     }
 
+    t(key, fallback, params = {}) {
+        const template = (window.i18n && window.i18n.t) ? window.i18n.t(key) : fallback;
+        return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+            Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+        ));
+    }
+
     /**
      * Creates or updates a chart
      * @param {string} id - The chart ID/canvas element ID
@@ -72,7 +79,12 @@ export class ChartManager {
         this.createOrUpdateChart('warrantyPieChart', {
             type: 'doughnut',
             data: {
-                labels: ['Expired', 'Expiring in 30 days', 'Expiring in 60 days', 'Active'],
+                labels: [
+                    this.t('chart.label.expired', 'Expired'),
+                    this.t('chart.label.expiring30', 'Expiring in 30 days'),
+                    this.t('chart.label.expiring60', 'Expiring in 60 days'),
+                    this.t('chart.label.active', 'Active')
+                ],
                 datasets: [{
                     data: [expired, within30, within60, active],
                     backgroundColor: [
@@ -128,7 +140,7 @@ export class ChartManager {
         for (let i = 0; i < 6; i++) {
             const date = new Date();
             date.setMonth(now.getMonth() + i);
-            months.push(date.toLocaleString('default', { month: 'short' }));
+            months.push(date.toLocaleString(window.i18n?.getSavedLang?.() || undefined, { month: 'short' }));
         }
 
         // Count warranties expiring in each month
@@ -156,7 +168,7 @@ export class ChartManager {
             data: {
                 labels: months,
                 datasets: [{
-                    label: 'Warranties Expiring',
+                    label: this.t('chart.label.warrantiesExpiring', 'Warranties Expiring'),
                     data: monthData,
                     borderColor: '#3b82f6',
                     backgroundColor: 'rgba(59, 130, 246, 0.1)',
@@ -211,7 +223,7 @@ export class ChartManager {
                     tooltip: {
                         callbacks: {
                             title: (context) => `${context[0].label}`,
-                            label: (context) => `${context.raw} warranties expiring`
+                            label: (context) => this.t('chart.tooltip.warrantyCount', '{count} warranties expiring', { count: context.raw })
                         }
                     }
                 },
@@ -288,7 +300,7 @@ export class ChartManager {
             data: {
                 labels: months,
                 datasets: [{
-                    label: 'Upcoming Maintenance',
+                    label: this.t('chart.label.upcomingMaintenance', 'Upcoming Maintenance'),
                     data: maintenanceMonthData,
                     borderColor: '#10b981', // Green (same as maintenance tag)
                     backgroundColor: 'rgba(16, 185, 129, 0.1)',
@@ -343,7 +355,7 @@ export class ChartManager {
                     tooltip: {
                         callbacks: {
                             title: (context) => `${context[0].label}`,
-                            label: (context) => `${context.raw} maintenance events`
+                            label: (context) => this.t('chart.tooltip.maintenanceCount', '{count} maintenance events', { count: context.raw })
                         }
                     }
                 },

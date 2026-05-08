@@ -32,6 +32,44 @@ let assetList;
 let assetDetails;
 let subAssetContainer;
 
+function t(key, fallback, params = {}) {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+        Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+    ));
+}
+
+function localizeUnit(unit, count) {
+    const normalized = String(unit || '').toLowerCase();
+    const singular = Number(count) === 1;
+    const keyMap = {
+        day: singular ? 'time.day' : 'time.days',
+        days: singular ? 'time.day' : 'time.days',
+        week: singular ? 'time.week' : 'time.weeks',
+        weeks: singular ? 'time.week' : 'time.weeks',
+        month: singular ? 'time.month' : 'time.months',
+        months: singular ? 'time.month' : 'time.months',
+        year: singular ? 'time.year' : 'time.years',
+        years: singular ? 'time.year' : 'time.years'
+    };
+    return keyMap[normalized] ? t(keyMap[normalized], unit) : unit;
+}
+
+function formatRecurringSchedule(frequency, unit) {
+    return t('maintenance.every', 'Every {frequency} {unit}', {
+        frequency,
+        unit: localizeUnit(unit, frequency)
+    });
+}
+
 /**
  * Initialize the renderer with required dependencies
  * 
@@ -125,22 +163,22 @@ function generateMaintenanceEventsHTML(maintenanceEvents) {
         let typeText = '';
         
         if (event.type === 'frequency') {
-            scheduleText = `Every ${event.frequency} ${event.frequencyUnit}`;
-            typeText = (window.i18n && window.i18n.t) ? window.i18n.t('maintenance.recurring') : 'Recurring';
+            scheduleText = formatRecurringSchedule(event.frequency, event.frequencyUnit);
+            typeText = t('maintenance.recurring', 'Recurring');
         } else if (event.type === 'specific') {
             scheduleText = `${formatDate(event.specificDate)}`;
-            typeText = (window.i18n && window.i18n.t) ? window.i18n.t('maintenance.oneTime') : 'One-time';
+            typeText = t('maintenance.oneTime', 'One-time');
         }
 
         return `
             <div class="maintenance-event-item">
                 <div class="maintenance-event-line">
-                    <strong>${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.eventLabel') : 'Event:'} ${event.name}</strong>
+                    <strong>${t('maintenance.eventLabel', 'Event')}: ${event.name}</strong>
                     <span class="maintenance-schedule-inline">${typeText} - ${scheduleText}</span>
                 </div>
                 ${event.notes ? `
                 <div class="maintenance-notes-line">
-                    <strong>${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.notesLabel') : 'Notes:'}</strong> ${event.notes}
+                    <strong>${t('maintenance.notesLabel', 'Notes:')}</strong> ${event.notes}
                 </div>
                 ` : ''}
             </div>
@@ -149,7 +187,7 @@ function generateMaintenanceEventsHTML(maintenanceEvents) {
 
     return `
         <div class="maintenance-section-inline">
-            <div class="info-label">Maintenance</div>
+            <div class="info-label">${t('maintenance.type', 'Maintenance')}</div>
             <div class="maintenance-events-list">
                 ${eventsHTML}
             </div>
@@ -167,15 +205,15 @@ function generateAssetInfoHTML(asset) {
     return `
         <div class="info-item">
             <div class="info-label">${i('asset.manufacturer','Manufacturer')}</div>
-            <div>${asset.manufacturer || 'N/A'}</div>
+            <div>${asset.manufacturer || t('word.na', 'N/A')}</div>
         </div>
         <div class="info-item">
             <div class="info-label">${i('asset.model','Model Number')}</div>
-            <div>${asset.modelNumber || 'N/A'}</div>
+            <div>${asset.modelNumber || t('word.na', 'N/A')}</div>
         </div>
         <div class="info-item">
             <div class="info-label">${i('asset.serial','Serial Number')}</div>
-            <div>${asset.serialNumber || 'N/A'}</div>
+            <div>${asset.serialNumber || t('word.na', 'N/A')}</div>
         </div>
         <div class="info-item">
             <div class="info-label">${i('asset.purchaseDate','Purchase Date')}</div>
@@ -231,7 +269,7 @@ function generateAssetInfoHTML(asset) {
  */
 function formatDisplayFileName(fileName, maxLength = 15) {
     if (!fileName || fileName.length <= maxLength) {
-        const unknown = (window.i18n && window.i18n.t) ? window.i18n.t('file.unknown') : 'Unknown File';
+        const unknown = t('file.unknown', 'Unknown File');
         return fileName || unknown;
     }
     
@@ -431,8 +469,8 @@ function renderAssetDetails(assetId, isSubAsset = false) {
     });
     
     // Determine legend title (localized)
-    let legendTitle = (window.i18n && window.i18n.t) ? window.i18n.t('asset.details') : 'Asset Details';
-    if (isSubAsset) legendTitle = (window.i18n && window.i18n.t) ? window.i18n.t('component.details') : 'Component Details';
+    let legendTitle = t('asset.details', 'Asset Details');
+    if (isSubAsset) legendTitle = t('component.details', 'Component Details');
 
     // Render asset or sub-asset details inside a unified fieldset/legend
     let maintenanceScheduleHtml = '';
@@ -441,12 +479,12 @@ function renderAssetDetails(assetId, isSubAsset = false) {
         if (asset.maintenanceSchedule.unit === 'custom') {
             scheduleText = asset.maintenanceSchedule.custom;
         } else if (asset.maintenanceSchedule.frequency && asset.maintenanceSchedule.unit) {
-            scheduleText = `Every ${asset.maintenanceSchedule.frequency} ${asset.maintenanceSchedule.unit}`;
+            scheduleText = formatRecurringSchedule(asset.maintenanceSchedule.frequency, asset.maintenanceSchedule.unit);
         }
         if (scheduleText) {
             maintenanceScheduleHtml = `
                 <div class="info-item">
-                        <div class="info-label">${(window.i18n && window.i18n.t) ? window.i18n.t('maintenance.schedule') : 'Maintenance Schedule'}</div>
+                        <div class="info-label">${t('maintenance.schedule', 'Maintenance Schedule')}</div>
                         <div>${scheduleText}</div>
                 </div>
             `;
@@ -459,19 +497,19 @@ function renderAssetDetails(assetId, isSubAsset = false) {
                 <div class="asset-title">
                     <h2>${asset.name}</h2>
                     <div class="asset-meta">
-                        ${(window.i18n && window.i18n.t) ? window.i18n.t('meta.added') : 'Added'}: ${formatDate(asset.createdAt)}
-                        ${asset.updatedAt !== asset.createdAt ? ` • ${(window.i18n && window.i18n.t) ? window.i18n.t('meta.updated') : 'Updated'}: ${formatDate(asset.updatedAt)}` : ''}
+                        ${t('meta.added', 'Added')}: ${formatDate(asset.createdAt)}
+                        ${asset.updatedAt !== asset.createdAt ? ` | ${t('meta.updated', 'Updated')}: ${formatDate(asset.updatedAt)}` : ''}
                     </div>
                 </div>
                 <div class="asset-actions">
-                    ${isSub ? `<button class="back-to-parent-btn" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.backToParent') : 'Back to Parent'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>` : ''}
-                    <button class="copy-link-btn" data-id="${asset.id}" data-parent-id="${asset.parentId || ''}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.copyLink') : 'Copy Link'}">
+                    ${isSub ? `<button class="back-to-parent-btn" title="${t('action.backToParent', 'Back to Parent')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button>` : ''}
+                    <button class="copy-link-btn" data-id="${asset.id}" data-parent-id="${asset.parentId || ''}" title="${t('action.copyLink', 'Copy Link')}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                     </button>
-                    <button class="edit-asset-btn" data-id="${asset.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.edit') : 'Edit'}">
+                    <button class="edit-asset-btn" data-id="${asset.id}" title="${t('action.edit', 'Edit')}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19.5 3 21l1.5-4L16.5 3.5z"/></svg>
                     </button>
-                    <button class="delete-asset-btn" data-id="${asset.id}" title="${(window.i18n && window.i18n.t) ? window.i18n.t('action.delete') : 'Delete'}">
+                    <button class="delete-asset-btn" data-id="${asset.id}" title="${t('action.delete', 'Delete')}">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
                 </div>
@@ -483,13 +521,13 @@ function renderAssetDetails(assetId, isSubAsset = false) {
             </div>
             ${(asset.description || asset.notes) ? `
             <div class="asset-description">
-                <strong>${(window.i18n && window.i18n.t) ? window.i18n.t('label.description') : 'Description'}:</strong>
+                <strong>${t('label.description', 'Description')}:</strong>
                 <p>${asset.description || asset.notes}</p>
             </div>
             ` : ''}
             ${asset.tags && asset.tags.length > 0 ? `
             <div class="info-item" style="margin-bottom: 1rem;">
-                <div class="info-label">${(window.i18n && window.i18n.t) ? window.i18n.t('asset.tags') : 'Tags'}</div>
+                <div class="info-label">${t('asset.tags', 'Tags')}</div>
                 <div class="tag-list">
                     ${asset.tags.map(tag => `<span class="tag" data-tag="${tag}" style="cursor: pointer;">${tag}</span>`).join('')}
                 </div>
@@ -535,7 +573,7 @@ function renderAssetDetails(assetId, isSubAsset = false) {
             // Copy to clipboard
             navigator.clipboard.writeText(assetUrl).then(() => {
                 // Show success toast using global toaster
-                const msg = (window.i18n && window.i18n.t) ? window.i18n.t('asset.linkCopied') : 'Asset link copied to clipboard!';
+                const msg = t('asset.linkCopied', 'Asset link copied to clipboard!');
                 if (globalThis.toaster) {
                     globalThis.toaster.show(msg, 'success', false, 2000);
                 } else {
@@ -549,7 +587,7 @@ function renderAssetDetails(assetId, isSubAsset = false) {
                     globalThis.logError('Failed to copy link to clipboard', err, false, 3000);
                 } else {
                     // Fallback alert if error handler is not available
-                    alert((window.i18n && window.i18n.t) ? window.i18n.t('asset.copyFailed') || 'Failed to copy link to clipboard. Please try again.' : 'Failed to copy link to clipboard. Please try again.');
+                    alert(t('asset.copyFailed', 'Failed to copy link to clipboard. Please try again.'));
                 }
             });
         });
@@ -613,7 +651,7 @@ function renderAssetDetails(assetId, isSubAsset = false) {
             
             const legend = document.createElement('legend');
             legend.className = 'dashboard-legend-title';
-            legend.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('components.legend') : 'Components';
+            legend.textContent = t('components.legend', 'Components');
             fieldset.appendChild(legend);
             
             const subAssetHeader = document.createElement('div');
@@ -622,7 +660,7 @@ function renderAssetDetails(assetId, isSubAsset = false) {
             
             const addSubAssetBtn = document.createElement('button');
             addSubAssetBtn.className = 'add-sub-asset-btn';
-            addSubAssetBtn.textContent = (window.i18n && window.i18n.t) ? window.i18n.t('add.subcomponent') : '+ Add Sub-Component';
+            addSubAssetBtn.textContent = t('add.subcomponent', '+ Add Sub-Component');
             addSubAssetBtn.onclick = () => openSubAssetModal(null, asset.parentId, asset.id);
             subAssetHeader.appendChild(addSubAssetBtn);
             fieldset.appendChild(subAssetHeader);
@@ -633,7 +671,7 @@ function renderAssetDetails(assetId, isSubAsset = false) {
             if (subSubAssets.length === 0) {
                 const emptyState = document.createElement('div');
                 emptyState.className = 'empty-state';
-                const emptyMsg = (window.i18n && window.i18n.t) ? window.i18n.t('empty.noComponents') : 'No components found. Add your first component.';
+                const emptyMsg = t('empty.noComponents', 'No components found. Add your first component.');
                 emptyState.innerHTML = `<p>${emptyMsg}</p>`;
                 subAssetList.appendChild(emptyState);
             } else {

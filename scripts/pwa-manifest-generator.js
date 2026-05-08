@@ -28,8 +28,12 @@ function getFiles(dir, basePath = "/") {
 function generateAssetManifest() {
   console.log("Generating Asset manifest...");
   const assets = getFiles(PUBLIC_DIR);
-  fs.writeFileSync(path.join(ASSETS_DIR, "asset-manifest.json"), JSON.stringify(assets, null, 2));
-  console.log("Asset manifest generated!");
+  try {
+    fs.writeFileSync(path.join(ASSETS_DIR, "asset-manifest.json"), JSON.stringify(assets, null, 2));
+    console.log("Asset manifest generated!");
+  } catch (error) {
+    console.warn(`Skipping asset manifest generation: ${error.message}`);
+  }
 }
 
 function generatePWAManifest(siteTitle) {
@@ -59,8 +63,12 @@ function generatePWAManifest(siteTitle) {
     orientation: "any"
   };
 
-  fs.writeFileSync(path.join(ASSETS_DIR, "manifest.json"), JSON.stringify(pwaManifest, null, 2));
-  console.log("PWA manifest generated!");
+  try {
+    fs.writeFileSync(path.join(ASSETS_DIR, "manifest.json"), JSON.stringify(pwaManifest, null, 2));
+    console.log("PWA manifest generated!");
+  } catch (error) {
+    console.warn(`Skipping PWA manifest generation: ${error.message}`);
+  }
 }
 
 module.exports = { generatePWAManifest };

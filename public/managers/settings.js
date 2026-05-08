@@ -1,4 +1,35 @@
 // SettingsManager handles all settings modal logic, loading, saving, and dashboard order drag/drop
+const t = (key, fallback, params = {}) => {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+        Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+    ));
+};
+
+const localizeUnit = (unit, count = 2) => {
+    const normalized = String(unit || '').toLowerCase();
+    const singular = Number(count) === 1;
+    const keyMap = {
+        day: singular ? 'time.day' : 'time.days',
+        days: singular ? 'time.day' : 'time.days',
+        week: singular ? 'time.week' : 'time.weeks',
+        weeks: singular ? 'time.week' : 'time.weeks',
+        month: singular ? 'time.month' : 'time.months',
+        months: singular ? 'time.month' : 'time.months',
+        year: singular ? 'time.year' : 'time.years',
+        years: singular ? 'time.year' : 'time.years'
+    };
+    return keyMap[normalized] ? t(keyMap[normalized], unit) : unit;
+};
+
 export class SettingsManager {
     constructor({
         settingsBtn,
@@ -279,7 +310,7 @@ export class SettingsManager {
             const settingsCopy = { ...settings };
             localStorage.setItem(this.localSettingsStorageKey, JSON.stringify(settingsCopy));
             this.closeSettingsModal();
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('settings.saved') : 'Settings saved');
+            globalThis.toaster.show(t('settings.saved', 'Settings saved'));
             if (!this.selectedAssetId && typeof this.renderDashboard === 'function') {
                 this.renderDashboard();
             }
@@ -314,7 +345,7 @@ export class SettingsManager {
         .then(async (response) => {
             const responseValidation = await globalThis.validateResponse(response);
             if (responseValidation.errorMessage) throw new Error(responseValidation.errorMessage);
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('notifications.testSent') : 'Test notifications sent successfully!');
+            globalThis.toaster.show(t('notifications.testSent', 'Test notifications sent successfully!'));
         })
         .catch(error => {
             globalThis.logError('Test Notification Failed:', error.message);
@@ -560,7 +591,7 @@ export class SettingsManager {
             link.click();
             document.body.removeChild(link);
             
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('export.success') : 'Data exported successfully!');
+            globalThis.toaster.show(t('export.success', 'Data exported successfully!'));
             
         } catch (error) {
             globalThis.logError('Failed to export data:', error.message);
@@ -619,15 +650,15 @@ export class SettingsManager {
             return events.map(event => {
                 let eventStr = `${event.name}`;
                 if (event.type === 'frequency') {
-                    eventStr += ` (Every ${event.frequency} ${event.frequencyUnit})`;
+                    eventStr += ` (${t('maintenance.every', 'Every {frequency} {unit}', { frequency: event.frequency, unit: localizeUnit(event.frequencyUnit, event.frequency) })})`;
                     if (event.nextDueDate) {
-                        eventStr += ` - Next: ${event.nextDueDate}`;
+                        eventStr += ` - ${t('maintenance.next', 'Next: {date}', { date: event.nextDueDate })}`;
                     }
                 } else if (event.type === 'specific' && event.specificDate) {
-                    eventStr += ` - Date: ${event.specificDate}`;
+                    eventStr += ` - ${t('maintenance.date', 'Date: {date}', { date: event.specificDate })}`;
                 }
                 if (event.notes) {
-                    eventStr += ` - Notes: ${event.notes}`;
+                    eventStr += ` - ${t('maintenance.notesLabel', 'Notes:')} ${event.notes}`;
                 }
                 return eventStr;
             }).join('; ');
@@ -751,7 +782,7 @@ export class SettingsManager {
             link.click();
             document.body.removeChild(link);
             
-            globalThis.toaster.show((window.i18n && window.i18n.t) ? window.i18n.t('export.simpleSuccess') : 'Simple data exported successfully!');
+            globalThis.toaster.show(t('export.simpleSuccess', 'Simple data exported successfully!'));
             
         } catch (error) {
             globalThis.logError('Failed to export simple data:', error.message);
@@ -763,14 +794,14 @@ export class SettingsManager {
     _generateSimpleCSV(assets, subAssets) {
         // Simple CSV headers - only basic fields
         const headers = [
-            'Name',
-            'Manufacturer',
-            'Model',
-            'Serial',
-            'Purchase Date',
-            'Purchase Price',
-            'Notes',
-            'URL'
+            t('export.header.name', 'Name'),
+            t('export.header.manufacturer', 'Manufacturer'),
+            t('export.header.modelNumber', 'Model'),
+            t('export.header.serialNumber', 'Serial'),
+            t('export.header.purchaseDate', 'Purchase Date'),
+            t('export.header.purchasePrice', 'Purchase Price'),
+            t('export.header.notes', 'Notes'),
+            t('export.header.url', 'URL')
         ];
         
         const rows = [headers];

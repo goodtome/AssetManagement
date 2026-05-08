@@ -6,6 +6,34 @@
 import { validateFileType, formatFileSize, sanitizeFileName } from './utils.js';
 import { createPhotoPreview, createDocumentPreview } from '../render/previewRenderer.js';
 
+const t = (key, fallback, params = {}) => {
+    let template;
+    if (window.i18n && window.i18n.t) {
+        template = window.i18n.t(key);
+        if (!template || template === key) {
+            template = fallback;
+        }
+    } else {
+        template = fallback;
+    }
+    return String(template).replace(/\{(\w+)\}/g, (_, token) => (
+        Object.prototype.hasOwnProperty.call(params, token) ? params[token] : `{${token}}`
+    ));
+};
+
+const getDocumentTypeLabel = (type) => {
+    switch (type) {
+        case 'receipt':
+            return t('file.receipt', 'Receipt');
+        case 'manual':
+            return t('file.manual', 'Manual');
+        case 'import':
+            return t('import.title', 'Import');
+        default:
+            return t('file.document', 'Document');
+    }
+};
+
 // Get access to the global flags
 let deletePhoto = false, deleteReceipt = false, deleteManual = false;
 let deleteSubPhoto = false, deleteSubReceipt = false, deleteSubManual = false;
@@ -182,10 +210,10 @@ function setupFileInputPreview(inputId, previewId, isDocument = false, fileType 
             }
             
             // Set up delete handler (localized)
-            const localizedDocType = (docType === 'receipt') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.receipt') || 'Receipt') : 'Receipt') : ((docType === 'manual') ? ((window.i18n && window.i18n.t) ? (window.i18n.t('file.manual') || 'Manual') : 'Manual') : ((window.i18n && window.i18n.t) ? (window.i18n.t('file.document') || 'Document') : 'Document'));
-            const confirmTemplate = (window.i18n && window.i18n.t) ? (window.i18n.t('confirm.deleteFile') || 'Are you sure you want to delete this {type}?') : 'Are you sure you want to delete this {type}?';
             const deleteHandler = () => {
-                const confirmMsg = confirmTemplate.replace('{type}', localizedDocType);
+                const confirmMsg = t('confirm.deleteFile', 'Are you sure you want to delete this {type}?', {
+                    type: getDocumentTypeLabel(docType)
+                });
                 if (confirm(confirmMsg)) {
                     removeFile(file);
                 }
@@ -200,10 +228,10 @@ function setupFileInputPreview(inputId, previewId, isDocument = false, fileType 
             const reader = new FileReader();
             reader.onload = (e) => {
                 // Set up delete handler (localized)
-                const photoLabel = (window.i18n && window.i18n.t) ? (window.i18n.t('file.photo') || 'Photo') : 'Photo';
-                const confirmTemplateImg = (window.i18n && window.i18n.t) ? (window.i18n.t('confirm.deleteFile') || 'Are you sure you want to delete this {type}?') : 'Are you sure you want to delete this image?';
                 const deleteHandler = () => {
-                    const confirmMsg = confirmTemplateImg.replace('{type}', photoLabel);
+                    const confirmMsg = t('confirm.deleteFile', 'Are you sure you want to delete this {type}?', {
+                        type: t('file.photo', 'Photo')
+                    });
                     if (confirm(confirmMsg)) {
                         removeFile(file);
                     }
@@ -523,18 +551,27 @@ function setupDragAndDrop() {
                 
                 if (invalidFiles > 0) {
                     if (validFiles > 0) {
-                        const fileText = acceptsMultiple ? (window.i18n && window.i18n.t ? window.i18n.t('file.uploadSummary').replace('{valid}', validFiles).replace('{type}', acceptsMultiple ? (window.i18n.t('file.unknown') || 'file(s)') : (window.i18n.t('file.unknown') || 'file')) : `${validFiles} valid file(s)`) : (window.i18n && window.i18n.t ? window.i18n.t('file.uploadSummary').replace('{valid}', validFiles).replace('{type}', (window.i18n.t('file.unknown') || 'file')).replace('{invalid}', invalidFiles) : `${validFiles} valid file(s) added. ${invalidFiles} file(s) were invalid or duplicate and were skipped.`);
-                        const summaryMsg = (window.i18n && window.i18n.t) ? window.i18n.t('file.uploadSummary').replace('{valid}', validFiles).replace('{type}', acceptsMultiple ? (window.i18n.t('file.unknown') || 'file(s)') : (window.i18n.t('file.unknown') || 'file')).replace('{invalid}', invalidFiles) : `${validFiles} valid file(s) added. ${invalidFiles} file(s) were invalid or duplicate and were skipped.`;
+                        const summaryMsg = t(
+                            'file.uploadSummary',
+                            '{valid} valid {type} added. {invalid} file(s) were invalid or duplicate and were skipped.',
+                            {
+                                valid: validFiles,
+                                invalid: invalidFiles,
+                                type: acceptsMultiple ? t('word.files', 'files') : t('word.file', 'file')
+                            }
+                        );
                         if (globalThis.toaster) globalThis.toaster.show(summaryMsg, 'error');
                         else alert(summaryMsg);
                     } else {
-                        const message = (window.i18n && window.i18n.t) ? (acceptsMultiple ? window.i18n.t('file.invalidMultiple') : window.i18n.t('file.invalidAll')) : (acceptsMultiple ? 'Invalid file type(s) or duplicate files. Please upload supported, non-duplicate files.' : 'Invalid file type. Please upload a supported file.');
+                        const message = acceptsMultiple
+                            ? t('file.invalidMultiple', 'Invalid file type(s) or duplicate files. Please upload supported, non-duplicate files.')
+                            : t('file.invalidAll', 'Invalid file type. Please upload a supported file.');
                         if (globalThis.toaster) globalThis.toaster.show(message, 'error');
                         else alert(message);
                     }
                 } else if (validFiles > 1 && !acceptsMultiple) {
                     // User dropped multiple files on a single-file input
-                    const onlyOneMsg = (window.i18n && window.i18n.t) ? window.i18n.t('file.onlyOneAllowed') : 'Only one file allowed. The first valid file was selected.';
+                    const onlyOneMsg = t('file.onlyOneAllowed', 'Only one file allowed. The first valid file was selected.');
                     if (globalThis.toaster) globalThis.toaster.show(onlyOneMsg, 'error');
                     else alert(onlyOneMsg);
                 }

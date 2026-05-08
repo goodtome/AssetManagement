@@ -20,6 +20,14 @@ const debugLog = (typeof global.debugLog === 'function') ? global.debugLog : (..
 // Get the configured timezone
 const TIMEZONE = process.env.TZ || 'America/Chicago';
 
+function getNotificationLanguage(settings) {
+    return settings?.language === 'zh' ? 'zh' : 'en';
+}
+
+function getUnknownParentLabel(language) {
+    return language === 'zh' ? '未知父级' : 'Unknown Parent';
+}
+
 /**
  * Robust date parsing function that handles multiple formats
  * @param {string|Date} dateValue - The date value to parse
@@ -182,6 +190,7 @@ async function startWarrantyCron() {
         const today = getTodayString();
         const settings = readJsonFile(configFilePath);
         const notificationSettings = settings.notificationSettings || {};
+        const language = getNotificationLanguage(settings);
         const appriseUrl = process.env.APPRISE_URL;
 
         debugLog(`[DEBUG] Starting warranty check for ${today} in timezone ${TIMEZONE}`);
@@ -235,7 +244,8 @@ async function startWarrantyCron() {
                             },
                             config: { 
                                 appriseUrl,
-                                baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+                                baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+                                language
                             }
                         });
                         debugLog(`[DEBUG] ${warrantyType} ${threshold.days}-day notification queued for ${assetType.toLowerCase()}: ${asset.name}`);
@@ -335,6 +345,7 @@ async function checkMaintenanceSchedules() {
     const settings = readJsonFile(configFilePath);
     const notificationSettings = settings.notificationSettings || {};
     if (!notificationSettings.notifyMaintenance) return;
+    const language = getNotificationLanguage(settings);
     
     const assets = readJsonFile(assetsFilePath);
     const subAssets = readJsonFile(subAssetsFilePath);
@@ -536,7 +547,7 @@ async function checkMaintenanceSchedules() {
                     if (isSubAsset && asset.parentId) {
                         notificationData.parentId = asset.parentId;
                         const parentAsset = assets.find(a => a.id === asset.parentId);
-                        notificationData.parentAsset = parentAsset ? parentAsset.name : 'Unknown Parent';
+                        notificationData.parentAsset = parentAsset ? parentAsset.name : getUnknownParentLabel(language);
                     }
 
                     notificationsToSend.push({
@@ -544,7 +555,8 @@ async function checkMaintenanceSchedules() {
                         data: notificationData,
                         config: { 
                             appriseUrl,
-                            baseUrl: process.env.BASE_URL || 'http://localhost:3000'
+                            baseUrl: process.env.BASE_URL || 'http://localhost:3000',
+                            language
                         }
                     });
                     
