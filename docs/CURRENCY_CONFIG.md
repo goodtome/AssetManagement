@@ -51,6 +51,7 @@ export CURRENCY_LOCALE=ja-JP
 ```yaml
 services:
   dumbassets:
+    image: pregnancy1000/assetmanagment:latest
     environment:
       - CURRENCY_CODE=EUR
       - CURRENCY_LOCALE=de-DE
@@ -58,7 +59,7 @@ services:
 
 ### Docker Run
 ```bash
-docker run -e CURRENCY_CODE=EUR -e CURRENCY_LOCALE=de-DE dumbassets
+docker run -e CURRENCY_CODE=EUR -e CURRENCY_LOCALE=de-DE pregnancy1000/assetmanagment:latest
 ```
 
 ## Currency Format Examples

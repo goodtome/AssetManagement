@@ -1,7 +1,7 @@
 services:
   dumbassets:
     container_name: dumbassets
-    # image: dumbwareio/dumbassets:latest
+    # image: pregnancy1000/assetmanagment:latest
     build: .
     restart: unless-stopped
     ports: 
